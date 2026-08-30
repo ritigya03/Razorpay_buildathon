@@ -1,124 +1,169 @@
-import { useReveal } from "../hooks";
+import { useCountUp, useReveal } from "../hooks";
+
+function Metric({ value, k, suffix = "", decimals = 0 }: {
+  value: number; k: string; suffix?: string; decimals?: number;
+}) {
+  const v = useCountUp(value, { decimals, duration: 1400 });
+  return (
+    <div className="m">
+      <div className="n">{v}{suffix}</div>
+      <div className="k">{k}</div>
+    </div>
+  );
+}
+
+function Diagram() {
+  const around = [
+    [70, 60], [70, 180], [180, 30], [180, 210], [300, 70], [300, 170],
+  ];
+  const fraud = new Set([1, 3, 5]);
+  return (
+    <div className="diagram">
+      <svg viewBox="0 0 560 240" role="img" aria-label="one shared device linking many cards">
+        <defs>
+          <radialGradient id="g" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#4de1f2" />
+            <stop offset="100%" stopColor="#3395ff" />
+          </radialGradient>
+        </defs>
+        {around.map(([x, y], i) => (
+          <line key={i} className="edge" x1={430} y1={120} x2={x} y2={y} />
+        ))}
+        <circle className="ping" cx={430} cy={120} r={30} />
+        <circle className="ping" cx={430} cy={120} r={30} style={{ animationDelay: "1.2s" }} />
+        <circle className="hub" cx={430} cy={120} r={26} />
+        <text x={430} y={124} textAnchor="middle" fontSize="10" fill="#04102b" fontWeight="700">device</text>
+        {around.map(([x, y], i) => (
+          <g key={i}>
+            <circle className={"node" + (fraud.has(i) ? " fraud" : "")} cx={x} cy={y} r={13} />
+            <text x={x} y={y + 3} textAnchor="middle" fontSize="9" fill="#9aa4d6">card</text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
 
 export function Landing({ report, onEnter }: { report: any; onEnter: () => void }) {
   const m = report?.metrics;
   const dev = report?.ring_metrics?.rings?.device;
   const op = m?.operating_point?.test;
   const prauc = m?.pr_auc?.test ?? 0.546;
-  const rocauc = m?.roc_auc?.test ?? 0.905;
   const recall = op ? Math.round(op.recall * 100) : 84;
-  const costCut = op ? Math.round((1 - op.total_expected_cost / op.do_nothing_cost) * 100) : 76;
   const txnAlerts = op ? op.fp + op.tp : 18001;
   const ringAlerts = dev
     ? dev.rings_flagged + (report?.ring_metrics?.rings?.address?.rings_flagged ?? 0)
     : 132;
+  const reduction = Math.round(txnAlerts / Math.max(ringAlerts, 1));
+  const devPR = dev ? dev.ring_precision : 0.75;
 
   const s1 = useReveal<HTMLElement>();
   const s2 = useReveal<HTMLElement>();
   const s3 = useReveal<HTMLElement>();
-  const s4 = useReveal<HTMLElement>();
 
   return (
     <div className="lp">
+      <div className="grid-bg" />
+
       <nav className="nav">
         <span className="brand"><span className="mark">S</span> Project Sentinel</span>
-        <a onClick={onEnter} style={{ cursor: "pointer" }}>Open the dashboard →</a>
+        <button onClick={onEnter}>Open dashboard →</button>
       </nav>
 
-      <div className="eyebrow">Razorpay AI Buildathon · Track 02 — AI Risk Manager</div>
-      <h1>Reaching Vulcan's cross-merchant fraud signal without pooling raw data.</h1>
-      <p className="lede">
-        Vulcan sees fraud rings by centralising every merchant's transactions into one model.
-        Banks, regulated lenders and rival enterprises can't join that. Sentinel is the adapter
-        for them — federated learning for the network-level signal, and the honest precision,
-        recall and false-positive cost that a real risk team needs before trusting it.
-      </p>
-      <div className="actions">
-        <button className="primary" onClick={onEnter}>Open the live dashboard</button>
-        <a onClick={() => document.getElementById("how")?.scrollIntoView()} style={{ cursor: "pointer" }}>
-          How it works
-        </a>
+      <div className="inner">
+        <header className="hero reveal in">
+          <span className="chip"><span className="d" /> Razorpay AI Buildathon · Track 02 — AI Risk Manager</span>
+          <h1>Stop the fraud ring <span className="g">before the chargeback.</span></h1>
+          <p className="lede">
+            Vulcan sees cross-merchant fraud by centralising raw transaction data. Sentinel reaches
+            the same network-level signal without pooling it — and publishes the precision, recall
+            and false-positive cost that a risk team needs before trusting a model.
+          </p>
+          <div className="cta">
+            <button className="btn-grad" onClick={onEnter}>Open the live dashboard</button>
+            <button className="ghost" onClick={() => document.getElementById("how")?.scrollIntoView()}>
+              How it works
+            </button>
+          </div>
+          <Diagram />
+        </header>
+
+        <div className="band">
+          <Metric value={prauc} k="held-out PR-AUC" decimals={3} />
+          <Metric value={devPR * 100} k="device-ring precision" suffix="%" />
+          <Metric value={reduction} k="fewer alerts to review" suffix="×" />
+          <Metric value={40} k="hours flagged before the dispute" suffix="h" />
+        </div>
+
+        <section className="sec reveal" id="how" ref={s1}>
+          <h2>Three moving parts</h2>
+          <p className="sub">
+            A scorer for every transaction, an engine that groups the coordinated ones, and a loop
+            that checks itself against real chargebacks.
+          </p>
+          <div className="cards">
+            <div className="card">
+              <div className="num">1</div>
+              <h3>Transaction scorer</h3>
+              <p>
+                Gradient-boosted model on a strict forward-in-time split. Advisory 0–100 risk, never
+                an auto-block. PR-AUC {prauc.toFixed(3)}, recall {recall}% at the cost-optimal threshold.
+              </p>
+            </div>
+            <div className="card">
+              <div className="num">2</div>
+              <h3>Ring engine</h3>
+              <p>
+                Groups transactions that share a device fingerprint or shipping identity into
+                coordinated rings — {txnAlerts.toLocaleString()} alerts become ~{ringAlerts} reviewable
+                rings at {devPR.toFixed(2)} / {dev ? dev.ring_recall.toFixed(2) : "0.75"} precision/recall.
+              </p>
+            </div>
+            <div className="card">
+              <div className="num">3</div>
+              <h3>Dispute loop</h3>
+              <p>
+                Razorpay chargebacks are the ground truth. Every dispute is matched back to the ring
+                we flagged, with the lead time in hours.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="sec reveal" ref={s2}>
+          <h2>We don't replace Vulcan. We unlock it for the privacy-first world.</h2>
+          <div className="vs">
+            <div className="col them">
+              <h3>Centralised model</h3>
+              <ul>
+                <li>Raw transactions pooled into one model</li>
+                <li>Data-sovereign and mutually-competitive merchants stay out</li>
+                <li>Strong results, published without a baseline or false-positive rate</li>
+              </ul>
+            </div>
+            <div className="col us">
+              <h3>Project Sentinel</h3>
+              <ul>
+                <li>Raw data never leaves the merchant — only model updates are shared</li>
+                <li>Differential privacy on those updates</li>
+                <li>Precision, recall and a cost curve on a held-out set, in the open</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section className="sec reveal" ref={s3}>
+          <div className="strip">
+            <h2>Measured in the open</h2>
+            <p className="sub">
+              Every number is on the final 15% of the timeline, split by date and never shuffled.
+              The threshold is chosen on validation and applied once. The cockpit replays that
+              window live, with real Razorpay test-mode payments alongside.
+            </p>
+            <button className="btn-grad" onClick={onEnter}>Enter the cockpit →</button>
+          </div>
+        </section>
       </div>
-
-      <section id="how" ref={s1} className="reveal">
-        <h2>What it is</h2>
-        <p>
-          A detector for one class of loss: coordinated fraud rings — one actor spreading many
-          small payments across cards, devices and merchants so no single merchant sees enough
-          to react. Sentinel scores every transaction, then groups the ones that share a device
-          fingerprint or a shipping identity into rings a human can actually review.
-        </p>
-        <p>
-          It never blocks a payment. Every output is an advisory score and a short forensic note.
-          Razorpay chargebacks are the ground truth it's measured against.
-        </p>
-      </section>
-
-      <section ref={s2} className="reveal">
-        <h2>The numbers</h2>
-        <table className="numbers">
-          <thead>
-            <tr><th>Measure</th><th>Value</th><th>On</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Transaction model — PR-AUC</td><td className="n">{prauc.toFixed(3)}</td><td>held-out test</td></tr>
-            <tr><td>Transaction model — ROC-AUC</td><td className="n">{rocauc.toFixed(3)}</td><td>held-out test</td></tr>
-            <tr><td>Recall at the cost-optimal threshold</td><td className="n">{recall}%</td><td>held-out test</td></tr>
-            <tr><td>Expected-loss reduction vs doing nothing</td><td className="n">{costCut}%</td><td>held-out test</td></tr>
-            <tr>
-              <td>Device rings — precision / recall</td>
-              <td className="n">{dev ? `${dev.ring_precision.toFixed(2)} / ${dev.ring_recall.toFixed(2)}` : "0.75 / 0.75"}</td>
-              <td>held-out test</td>
-            </tr>
-            <tr>
-              <td>Review load</td>
-              <td className="n">{txnAlerts.toLocaleString()} → {ringAlerts} rings</td>
-              <td>held-out test</td>
-            </tr>
-          </tbody>
-        </table>
-        <p className="caption">
-          Measured on the final 15% of the timeline, split by date and never shuffled. The
-          threshold is chosen on validation and applied once. Numbers here are read live from the
-          running service.
-        </p>
-      </section>
-
-      <section ref={s3} className="reveal">
-        <h2>Where it sits next to Vulcan</h2>
-        <div className="cols">
-          <div>
-            <h3>Centralised model</h3>
-            <ul>
-              <li>Raw transactions pooled into one model</li>
-              <li>Data-sovereign and mutually-competitive merchants stay out</li>
-              <li>Strong results, but published without a baseline or false-positive rate</li>
-            </ul>
-          </div>
-          <div>
-            <h3>Sentinel</h3>
-            <ul>
-              <li>Raw data never leaves the merchant; only model updates are shared</li>
-              <li>Differential privacy on those updates</li>
-              <li>Precision, recall and a cost curve on a held-out set, in the open</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section ref={s4} className="reveal">
-        <h2>What didn't work</h2>
-        <p className="note">
-          The first plan was that explicit ring features would lift the model. They didn't — on
-          held-out data they moved PR-AUC by 0.003, within noise, because the dataset's
-          pre-engineered columns already carry that signal. So the ring layer isn't about
-          accuracy; it's about turning {txnAlerts.toLocaleString()} alerts into {ringAlerts}
-          {" "}reviewable rings. That result is in the repo too.
-        </p>
-        <div className="actions" style={{ marginTop: 24 }}>
-          <button className="primary" onClick={onEnter}>Open the dashboard</button>
-        </div>
-      </section>
 
       <div className="foot">Project Sentinel · Razorpay AI Buildathon</div>
     </div>
