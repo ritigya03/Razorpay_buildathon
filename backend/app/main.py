@@ -210,18 +210,32 @@ async def razorpay_webhook(
     evt = json.loads(body)
     etype = evt.get("event", "")
     payload = evt.get("payload", {})
+
+    def entity(*keys):
+        for k in keys:
+            node = payload.get(k)
+            if isinstance(node, dict) and isinstance(node.get("entity"), dict):
+                return node["entity"]
+        return None
+
     handled = "ignored"
-    if etype in ("payment.captured", "payment.authorized"):
-        ingest_payment(s, payload["payment"]["entity"], source="razorpay")
-        handled = "payment"
-    elif etype == "payment.dispute.created":
-        ingest_dispute(s, payload["payment.dispute"]["entity"], source="razorpay")
-        handled = "dispute.created"
-    elif etype in ("payment.dispute.won", "payment.dispute.lost",
-                   "payment.dispute.closed", "payment.dispute.under_review"):
-        ent = payload["payment.dispute"]["entity"]
-        update_dispute_status(s, ent["id"], ent.get("status", etype.split(".")[-1]))
-        handled = etype
+    try:
+        if etype in ("payment.captured", "payment.authorized"):
+            if (e := entity("payment")):
+                ingest_payment(s, e, source="razorpay")
+                handled = "payment"
+        elif etype.startswith("payment.dispute."):
+            d = entity("dispute", "payment.dispute")
+            if d is not None:
+                # dispute entity should carry payment_id; fall back to the payment node
+                d.setdefault("payment_id", (entity("payment") or {}).get("id"))
+                if etype == "payment.dispute.created":
+                    ingest_dispute(s, d, source="razorpay")
+                else:
+                    update_dispute_status(s, d["id"], d.get("status", etype.rsplit(".", 1)[-1]))
+                handled = etype
+    except Exception as ex:  # noqa: BLE001 — never make Razorpay retry on our bug
+        return {"event": etype, "handled": "error", "detail": str(ex)}
     return {"event": etype, "handled": handled}
 
 
