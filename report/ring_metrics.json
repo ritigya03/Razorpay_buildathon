@@ -1,0 +1,2478 @@
+{
+  "meta": {
+    "model": "Phase-1 baseline scorer + conservative ring grouping (no union-find)",
+    "cap_distinct_members": 25,
+    "fraud_ring_definition": ">= 2 fraudulent transactions in the group",
+    "ring_flag_rule": "mean member risk >= threshold, tuned on validation for best ring-F1",
+    "action": "advisory \u2014 flagged ring -> review item + forensic summary, never auto-block",
+    "per_txn_threshold": 0.015712802012996564,
+    "test_fraud_transactions": 3083,
+    "test_transaction_level_alerts": 18001
+  },
+  "rings": {
+    "device": {
+      "groups": 433,
+      "true_fraud_rings": 92,
+      "ring_threshold": 0.1443653932845944,
+      "threshold": 0.1443653932845944,
+      "rings_flagged": 92,
+      "ring_tp": 69,
+      "ring_fp": 23,
+      "ring_fn": 23,
+      "ring_precision": 0.75,
+      "ring_recall": 0.75,
+      "ring_f1": 0.75,
+      "val_tuning": {
+        "threshold": 0.1443653932845944,
+        "rings_flagged": 68,
+        "ring_tp": 46,
+        "ring_fp": 22,
+        "ring_fn": 16,
+        "ring_precision": 0.6764705882352942,
+        "ring_recall": 0.7419354838709677,
+        "ring_f1": 0.7076923076923077
+      },
+      "fraud_txns_in_this_ring_type": 549,
+      "fraud_txns_covered_by_flagged": 405,
+      "fraud_coverage_pct_of_all_fraud": 0.1313655530327603,
+      "bonus_fraud_below_txn_threshold": 3,
+      "curve": [
+        {
+          "threshold": 0.007307569047906178,
+          "rings_flagged": 303,
+          "ring_tp": 91,
+          "ring_fp": 212,
+          "ring_fn": 1,
+          "ring_precision": 0.30033003300330036,
+          "ring_recall": 0.9891304347826086,
+          "ring_f1": 0.46075949367088614
+        },
+        {
+          "threshold": 0.007491505720273921,
+          "rings_flagged": 300,
+          "ring_tp": 91,
+          "ring_fp": 209,
+          "ring_fn": 1,
+          "ring_precision": 0.30333333333333334,
+          "ring_recall": 0.9891304347826086,
+          "ring_f1": 0.46428571428571425
+        },
+        {
+          "threshold": 0.007642526491008953,
+          "rings_flagged": 298,
+          "ring_tp": 91,
+          "ring_fp": 207,
+          "ring_fn": 1,
+          "ring_precision": 0.3053691275167785,
+          "ring_recall": 0.9891304347826086,
+          "ring_f1": 0.46666666666666673
+        },
+        {
+          "threshold": 0.007882616855987993,
+          "rings_flagged": 295,
+          "ring_tp": 91,
+          "ring_fp": 204,
+          "ring_fn": 1,
+          "ring_precision": 0.30847457627118646,
+          "ring_recall": 0.9891304347826086,
+          "ring_f1": 0.47028423772609823
+        },
+        {
+          "threshold": 0.008194452791804367,
+          "rings_flagged": 293,
+          "ring_tp": 91,
+          "ring_fp": 202,
+          "ring_fn": 1,
+          "ring_precision": 0.310580204778157,
+          "ring_recall": 0.9891304347826086,
+          "ring_f1": 0.4727272727272727
+        },
+        {
+          "threshold": 0.008524965246240022,
+          "rings_flagged": 290,
+          "ring_tp": 91,
+          "ring_fp": 199,
+          "ring_fn": 1,
+          "ring_precision": 0.3137931034482759,
+          "ring_recall": 0.9891304347826086,
+          "ring_f1": 0.47643979057591623
+        },
+        {
+          "threshold": 0.008687472062253558,
+          "rings_flagged": 288,
+          "ring_tp": 91,
+          "ring_fp": 197,
+          "ring_fn": 1,
+          "ring_precision": 0.3159722222222222,
+          "ring_recall": 0.9891304347826086,
+          "ring_f1": 0.4789473684210527
+        },
+        {
+          "threshold": 0.009106886546092418,
+          "rings_flagged": 285,
+          "ring_tp": 91,
+          "ring_fp": 194,
+          "ring_fn": 1,
+          "ring_precision": 0.3192982456140351,
+          "ring_recall": 0.9891304347826086,
+          "ring_f1": 0.4827586206896552
+        },
+        {
+          "threshold": 0.009331267215047715,
+          "rings_flagged": 283,
+          "ring_tp": 91,
+          "ring_fp": 192,
+          "ring_fn": 1,
+          "ring_precision": 0.3215547703180212,
+          "ring_recall": 0.9891304347826086,
+          "ring_f1": 0.4853333333333333
+        },
+        {
+          "threshold": 0.009519736236969036,
+          "rings_flagged": 280,
+          "ring_tp": 91,
+          "ring_fp": 189,
+          "ring_fn": 1,
+          "ring_precision": 0.325,
+          "ring_recall": 0.9891304347826086,
+          "ring_f1": 0.489247311827957
+        },
+        {
+          "threshold": 0.009851553532993818,
+          "rings_flagged": 278,
+          "ring_tp": 91,
+          "ring_fp": 187,
+          "ring_fn": 1,
+          "ring_precision": 0.3273381294964029,
+          "ring_recall": 0.9891304347826086,
+          "ring_f1": 0.4918918918918919
+        },
+        {
+          "threshold": 0.0099679857966001,
+          "rings_flagged": 275,
+          "ring_tp": 90,
+          "ring_fp": 185,
+          "ring_fn": 2,
+          "ring_precision": 0.32727272727272727,
+          "ring_recall": 0.9782608695652174,
+          "ring_f1": 0.49046321525885556
+        },
+        {
+          "threshold": 0.010139714106880587,
+          "rings_flagged": 272,
+          "ring_tp": 90,
+          "ring_fp": 182,
+          "ring_fn": 2,
+          "ring_precision": 0.33088235294117646,
+          "ring_recall": 0.9782608695652174,
+          "ring_f1": 0.49450549450549447
+        },
+        {
+          "threshold": 0.010299799200214864,
+          "rings_flagged": 270,
+          "ring_tp": 89,
+          "ring_fp": 181,
+          "ring_fn": 3,
+          "ring_precision": 0.3296296296296296,
+          "ring_recall": 0.967391304347826,
+          "ring_f1": 0.49171270718232035
+        },
+        {
+          "threshold": 0.010545327036152529,
+          "rings_flagged": 267,
+          "ring_tp": 89,
+          "ring_fp": 178,
+          "ring_fn": 3,
+          "ring_precision": 0.3333333333333333,
+          "ring_recall": 0.967391304347826,
+          "ring_f1": 0.4958217270194986
+        },
+        {
+          "threshold": 0.010995489687368588,
+          "rings_flagged": 265,
+          "ring_tp": 89,
+          "ring_fp": 176,
+          "ring_fn": 3,
+          "ring_precision": 0.33584905660377357,
+          "ring_recall": 0.967391304347826,
+          "ring_f1": 0.4985994397759103
+        },
+        {
+          "threshold": 0.011261618506800153,
+          "rings_flagged": 262,
+          "ring_tp": 89,
+          "ring_fp": 173,
+          "ring_fn": 3,
+          "ring_precision": 0.33969465648854963,
+          "ring_recall": 0.967391304347826,
+          "ring_f1": 0.5028248587570622
+        },
+        {
+          "threshold": 0.01180502438271647,
+          "rings_flagged": 260,
+          "ring_tp": 89,
+          "ring_fp": 171,
+          "ring_fn": 3,
+          "ring_precision": 0.3423076923076923,
+          "ring_recall": 0.967391304347826,
+          "ring_f1": 0.5056818181818181
+        },
+        {
+          "threshold": 0.012256577341415848,
+          "rings_flagged": 257,
+          "ring_tp": 89,
+          "ring_fp": 168,
+          "ring_fn": 3,
+          "ring_precision": 0.3463035019455253,
+          "ring_recall": 0.967391304347826,
+          "ring_f1": 0.5100286532951289
+        },
+        {
+          "threshold": 0.012441380351127268,
+          "rings_flagged": 255,
+          "ring_tp": 88,
+          "ring_fp": 167,
+          "ring_fn": 4,
+          "ring_precision": 0.34509803921568627,
+          "ring_recall": 0.9565217391304348,
+          "ring_f1": 0.5072046109510087
+        },
+        {
+          "threshold": 0.012580270682312268,
+          "rings_flagged": 252,
+          "ring_tp": 88,
+          "ring_fp": 164,
+          "ring_fn": 4,
+          "ring_precision": 0.3492063492063492,
+          "ring_recall": 0.9565217391304348,
+          "ring_f1": 0.5116279069767442
+        },
+        {
+          "threshold": 0.012806244380085879,
+          "rings_flagged": 250,
+          "ring_tp": 88,
+          "ring_fp": 162,
+          "ring_fn": 4,
+          "ring_precision": 0.352,
+          "ring_recall": 0.9565217391304348,
+          "ring_f1": 0.5146198830409355
+        },
+        {
+          "threshold": 0.012944101024226787,
+          "rings_flagged": 247,
+          "ring_tp": 88,
+          "ring_fp": 159,
+          "ring_fn": 4,
+          "ring_precision": 0.3562753036437247,
+          "ring_recall": 0.9565217391304348,
+          "ring_f1": 0.5191740412979351
+        },
+        {
+          "threshold": 0.013406141955752616,
+          "rings_flagged": 245,
+          "ring_tp": 88,
+          "ring_fp": 157,
+          "ring_fn": 4,
+          "ring_precision": 0.35918367346938773,
+          "ring_recall": 0.9565217391304348,
+          "ring_f1": 0.5222551928783382
+        },
+        {
+          "threshold": 0.013554348697970175,
+          "rings_flagged": 242,
+          "ring_tp": 88,
+          "ring_fp": 154,
+          "ring_fn": 4,
+          "ring_precision": 0.36363636363636365,
+          "ring_recall": 0.9565217391304348,
+          "ring_f1": 0.5269461077844312
+        },
+        {
+          "threshold": 0.013742706917530345,
+          "rings_flagged": 239,
+          "ring_tp": 87,
+          "ring_fp": 152,
+          "ring_fn": 5,
+          "ring_precision": 0.36401673640167365,
+          "ring_recall": 0.9456521739130435,
+          "ring_f1": 0.525679758308157
+        },
+        {
+          "threshold": 0.013923390308057696,
+          "rings_flagged": 237,
+          "ring_tp": 87,
+          "ring_fp": 150,
+          "ring_fn": 5,
+          "ring_precision": 0.3670886075949367,
+          "ring_recall": 0.9456521739130435,
+          "ring_f1": 0.5288753799392097
+        },
+        {
+          "threshold": 0.014277935057807329,
+          "rings_flagged": 234,
+          "ring_tp": 87,
+          "ring_fp": 147,
+          "ring_fn": 5,
+          "ring_precision": 0.3717948717948718,
+          "ring_recall": 0.9456521739130435,
+          "ring_f1": 0.5337423312883436
+        },
+        {
+          "threshold": 0.015239883488979285,
+          "rings_flagged": 232,
+          "ring_tp": 87,
+          "ring_fp": 145,
+          "ring_fn": 5,
+          "ring_precision": 0.375,
+          "ring_recall": 0.9456521739130435,
+          "ring_f1": 0.537037037037037
+        },
+        {
+          "threshold": 0.016089993674940736,
+          "rings_flagged": 229,
+          "ring_tp": 87,
+          "ring_fp": 142,
+          "ring_fn": 5,
+          "ring_precision": 0.3799126637554585,
+          "ring_recall": 0.9456521739130435,
+          "ring_f1": 0.5420560747663551
+        },
+        {
+          "threshold": 0.01622292277424614,
+          "rings_flagged": 227,
+          "ring_tp": 87,
+          "ring_fp": 140,
+          "ring_fn": 5,
+          "ring_precision": 0.3832599118942731,
+          "ring_recall": 0.9456521739130435,
+          "ring_f1": 0.5454545454545453
+        },
+        {
+          "threshold": 0.016480535955039493,
+          "rings_flagged": 224,
+          "ring_tp": 87,
+          "ring_fp": 137,
+          "ring_fn": 5,
+          "ring_precision": 0.38839285714285715,
+          "ring_recall": 0.9456521739130435,
+          "ring_f1": 0.5506329113924051
+        },
+        {
+          "threshold": 0.016793194118488758,
+          "rings_flagged": 222,
+          "ring_tp": 86,
+          "ring_fp": 136,
+          "ring_fn": 6,
+          "ring_precision": 0.38738738738738737,
+          "ring_recall": 0.9347826086956522,
+          "ring_f1": 0.5477707006369428
+        },
+        {
+          "threshold": 0.01740338789374523,
+          "rings_flagged": 219,
+          "ring_tp": 86,
+          "ring_fp": 133,
+          "ring_fn": 6,
+          "ring_precision": 0.3926940639269406,
+          "ring_recall": 0.9347826086956522,
+          "ring_f1": 0.5530546623794212
+        },
+        {
+          "threshold": 0.01773712131770128,
+          "rings_flagged": 217,
+          "ring_tp": 86,
+          "ring_fp": 131,
+          "ring_fn": 6,
+          "ring_precision": 0.39631336405529954,
+          "ring_recall": 0.9347826086956522,
+          "ring_f1": 0.5566343042071198
+        },
+        {
+          "threshold": 0.018170383189884235,
+          "rings_flagged": 214,
+          "ring_tp": 86,
+          "ring_fp": 128,
+          "ring_fn": 6,
+          "ring_precision": 0.40186915887850466,
+          "ring_recall": 0.9347826086956522,
+          "ring_f1": 0.5620915032679739
+        },
+        {
+          "threshold": 0.018818479480836366,
+          "rings_flagged": 212,
+          "ring_tp": 86,
+          "ring_fp": 126,
+          "ring_fn": 6,
+          "ring_precision": 0.4056603773584906,
+          "ring_recall": 0.9347826086956522,
+          "ring_f1": 0.5657894736842106
+        },
+        {
+          "threshold": 0.019586437354754287,
+          "rings_flagged": 209,
+          "ring_tp": 86,
+          "ring_fp": 123,
+          "ring_fn": 6,
+          "ring_precision": 0.41148325358851673,
+          "ring_recall": 0.9347826086956522,
+          "ring_f1": 0.5714285714285714
+        },
+        {
+          "threshold": 0.019780211261217352,
+          "rings_flagged": 206,
+          "ring_tp": 86,
+          "ring_fp": 120,
+          "ring_fn": 6,
+          "ring_precision": 0.4174757281553398,
+          "ring_recall": 0.9347826086956522,
+          "ring_f1": 0.5771812080536913
+        },
+        {
+          "threshold": 0.020726243143666192,
+          "rings_flagged": 204,
+          "ring_tp": 86,
+          "ring_fp": 118,
+          "ring_fn": 6,
+          "ring_precision": 0.4215686274509804,
+          "ring_recall": 0.9347826086956522,
+          "ring_f1": 0.581081081081081
+        },
+        {
+          "threshold": 0.020988338311368072,
+          "rings_flagged": 201,
+          "ring_tp": 86,
+          "ring_fp": 115,
+          "ring_fn": 6,
+          "ring_precision": 0.42786069651741293,
+          "ring_recall": 0.9347826086956522,
+          "ring_f1": 0.5870307167235496
+        },
+        {
+          "threshold": 0.021434197663062506,
+          "rings_flagged": 199,
+          "ring_tp": 86,
+          "ring_fp": 113,
+          "ring_fn": 6,
+          "ring_precision": 0.4321608040201005,
+          "ring_recall": 0.9347826086956522,
+          "ring_f1": 0.5910652920962199
+        },
+        {
+          "threshold": 0.022296848788884507,
+          "rings_flagged": 196,
+          "ring_tp": 86,
+          "ring_fp": 110,
+          "ring_fn": 6,
+          "ring_precision": 0.4387755102040816,
+          "ring_recall": 0.9347826086956522,
+          "ring_f1": 0.5972222222222222
+        },
+        {
+          "threshold": 0.02325176344586829,
+          "rings_flagged": 194,
+          "ring_tp": 86,
+          "ring_fp": 108,
+          "ring_fn": 6,
+          "ring_precision": 0.44329896907216493,
+          "ring_recall": 0.9347826086956522,
+          "ring_f1": 0.6013986013986015
+        },
+        {
+          "threshold": 0.024025329355414123,
+          "rings_flagged": 191,
+          "ring_tp": 86,
+          "ring_fp": 105,
+          "ring_fn": 6,
+          "ring_precision": 0.450261780104712,
+          "ring_recall": 0.9347826086956522,
+          "ring_f1": 0.607773851590106
+        },
+        {
+          "threshold": 0.02519332336777191,
+          "rings_flagged": 189,
+          "ring_tp": 85,
+          "ring_fp": 104,
+          "ring_fn": 7,
+          "ring_precision": 0.4497354497354497,
+          "ring_recall": 0.9239130434782609,
+          "ring_f1": 0.604982206405694
+        },
+        {
+          "threshold": 0.02651925400699912,
+          "rings_flagged": 186,
+          "ring_tp": 85,
+          "ring_fp": 101,
+          "ring_fn": 7,
+          "ring_precision": 0.45698924731182794,
+          "ring_recall": 0.9239130434782609,
+          "ring_f1": 0.6115107913669064
+        },
+        {
+          "threshold": 0.026936383808855376,
+          "rings_flagged": 184,
+          "ring_tp": 85,
+          "ring_fp": 99,
+          "ring_fn": 7,
+          "ring_precision": 0.46195652173913043,
+          "ring_recall": 0.9239130434782609,
+          "ring_f1": 0.6159420289855072
+        },
+        {
+          "threshold": 0.027573791030018415,
+          "rings_flagged": 181,
+          "ring_tp": 85,
+          "ring_fp": 96,
+          "ring_fn": 7,
+          "ring_precision": 0.4696132596685083,
+          "ring_recall": 0.9239130434782609,
+          "ring_f1": 0.6227106227106228
+        },
+        {
+          "threshold": 0.027970742505505877,
+          "rings_flagged": 179,
+          "ring_tp": 84,
+          "ring_fp": 95,
+          "ring_fn": 8,
+          "ring_precision": 0.4692737430167598,
+          "ring_recall": 0.9130434782608695,
+          "ring_f1": 0.6199261992619925
+        },
+        {
+          "threshold": 0.02889948808892285,
+          "rings_flagged": 176,
+          "ring_tp": 84,
+          "ring_fp": 92,
+          "ring_fn": 8,
+          "ring_precision": 0.4772727272727273,
+          "ring_recall": 0.9130434782608695,
+          "ring_f1": 0.6268656716417911
+        },
+        {
+          "threshold": 0.029794418548635723,
+          "rings_flagged": 173,
+          "ring_tp": 84,
+          "ring_fp": 89,
+          "ring_fn": 8,
+          "ring_precision": 0.48554913294797686,
+          "ring_recall": 0.9130434782608695,
+          "ring_f1": 0.6339622641509433
+        },
+        {
+          "threshold": 0.03065458601799092,
+          "rings_flagged": 171,
+          "ring_tp": 84,
+          "ring_fp": 87,
+          "ring_fn": 8,
+          "ring_precision": 0.49122807017543857,
+          "ring_recall": 0.9130434782608695,
+          "ring_f1": 0.6387832699619772
+        },
+        {
+          "threshold": 0.03106924304967677,
+          "rings_flagged": 168,
+          "ring_tp": 84,
+          "ring_fp": 84,
+          "ring_fn": 8,
+          "ring_precision": 0.5,
+          "ring_recall": 0.9130434782608695,
+          "ring_f1": 0.6461538461538461
+        },
+        {
+          "threshold": 0.03249668564345837,
+          "rings_flagged": 166,
+          "ring_tp": 84,
+          "ring_fp": 82,
+          "ring_fn": 8,
+          "ring_precision": 0.5060240963855421,
+          "ring_recall": 0.9130434782608695,
+          "ring_f1": 0.6511627906976744
+        },
+        {
+          "threshold": 0.03358985626757557,
+          "rings_flagged": 163,
+          "ring_tp": 84,
+          "ring_fp": 79,
+          "ring_fn": 8,
+          "ring_precision": 0.5153374233128835,
+          "ring_recall": 0.9130434782608695,
+          "ring_f1": 0.6588235294117647
+        },
+        {
+          "threshold": 0.03543972123152011,
+          "rings_flagged": 161,
+          "ring_tp": 84,
+          "ring_fp": 77,
+          "ring_fn": 8,
+          "ring_precision": 0.5217391304347826,
+          "ring_recall": 0.9130434782608695,
+          "ring_f1": 0.6640316205533596
+        },
+        {
+          "threshold": 0.03692543831512651,
+          "rings_flagged": 158,
+          "ring_tp": 84,
+          "ring_fp": 74,
+          "ring_fn": 8,
+          "ring_precision": 0.5316455696202531,
+          "ring_recall": 0.9130434782608695,
+          "ring_f1": 0.672
+        },
+        {
+          "threshold": 0.03885425874566504,
+          "rings_flagged": 156,
+          "ring_tp": 83,
+          "ring_fp": 73,
+          "ring_fn": 9,
+          "ring_precision": 0.532051282051282,
+          "ring_recall": 0.9021739130434783,
+          "ring_f1": 0.6693548387096774
+        },
+        {
+          "threshold": 0.03960849152001522,
+          "rings_flagged": 153,
+          "ring_tp": 83,
+          "ring_fp": 70,
+          "ring_fn": 9,
+          "ring_precision": 0.5424836601307189,
+          "ring_recall": 0.9021739130434783,
+          "ring_f1": 0.6775510204081632
+        },
+        {
+          "threshold": 0.04075247227239663,
+          "rings_flagged": 151,
+          "ring_tp": 83,
+          "ring_fp": 68,
+          "ring_fn": 9,
+          "ring_precision": 0.5496688741721855,
+          "ring_recall": 0.9021739130434783,
+          "ring_f1": 0.6831275720164609
+        },
+        {
+          "threshold": 0.041449834530231586,
+          "rings_flagged": 148,
+          "ring_tp": 83,
+          "ring_fp": 65,
+          "ring_fn": 9,
+          "ring_precision": 0.5608108108108109,
+          "ring_recall": 0.9021739130434783,
+          "ring_f1": 0.6916666666666668
+        },
+        {
+          "threshold": 0.04240354237470838,
+          "rings_flagged": 146,
+          "ring_tp": 83,
+          "ring_fp": 63,
+          "ring_fn": 9,
+          "ring_precision": 0.5684931506849316,
+          "ring_recall": 0.9021739130434783,
+          "ring_f1": 0.6974789915966387
+        },
+        {
+          "threshold": 0.04380258623357688,
+          "rings_flagged": 143,
+          "ring_tp": 83,
+          "ring_fp": 60,
+          "ring_fn": 9,
+          "ring_precision": 0.5804195804195804,
+          "ring_recall": 0.9021739130434783,
+          "ring_f1": 0.7063829787234042
+        },
+        {
+          "threshold": 0.04482003724494196,
+          "rings_flagged": 140,
+          "ring_tp": 82,
+          "ring_fp": 58,
+          "ring_fn": 10,
+          "ring_precision": 0.5857142857142857,
+          "ring_recall": 0.8913043478260869,
+          "ring_f1": 0.7068965517241379
+        },
+        {
+          "threshold": 0.04656181045719567,
+          "rings_flagged": 138,
+          "ring_tp": 82,
+          "ring_fp": 56,
+          "ring_fn": 10,
+          "ring_precision": 0.5942028985507246,
+          "ring_recall": 0.8913043478260869,
+          "ring_f1": 0.7130434782608696
+        },
+        {
+          "threshold": 0.048550720850920596,
+          "rings_flagged": 135,
+          "ring_tp": 82,
+          "ring_fp": 53,
+          "ring_fn": 10,
+          "ring_precision": 0.6074074074074074,
+          "ring_recall": 0.8913043478260869,
+          "ring_f1": 0.7224669603524229
+        },
+        {
+          "threshold": 0.05555634556657138,
+          "rings_flagged": 133,
+          "ring_tp": 81,
+          "ring_fp": 52,
+          "ring_fn": 11,
+          "ring_precision": 0.6090225563909775,
+          "ring_recall": 0.8804347826086957,
+          "ring_f1": 0.7200000000000001
+        },
+        {
+          "threshold": 0.05797571635756023,
+          "rings_flagged": 130,
+          "ring_tp": 80,
+          "ring_fp": 50,
+          "ring_fn": 12,
+          "ring_precision": 0.6153846153846154,
+          "ring_recall": 0.8695652173913043,
+          "ring_f1": 0.7207207207207207
+        },
+        {
+          "threshold": 0.059651990725185365,
+          "rings_flagged": 128,
+          "ring_tp": 80,
+          "ring_fp": 48,
+          "ring_fn": 12,
+          "ring_precision": 0.625,
+          "ring_recall": 0.8695652173913043,
+          "ring_f1": 0.7272727272727273
+        },
+        {
+          "threshold": 0.062385922431867274,
+          "rings_flagged": 125,
+          "ring_tp": 79,
+          "ring_fp": 46,
+          "ring_fn": 13,
+          "ring_precision": 0.632,
+          "ring_recall": 0.8586956521739131,
+          "ring_f1": 0.7281105990783409
+        },
+        {
+          "threshold": 0.06571334272619916,
+          "rings_flagged": 123,
+          "ring_tp": 78,
+          "ring_fp": 45,
+          "ring_fn": 14,
+          "ring_precision": 0.6341463414634146,
+          "ring_recall": 0.8478260869565217,
+          "ring_f1": 0.7255813953488373
+        },
+        {
+          "threshold": 0.07528185319212095,
+          "rings_flagged": 120,
+          "ring_tp": 78,
+          "ring_fp": 42,
+          "ring_fn": 14,
+          "ring_precision": 0.65,
+          "ring_recall": 0.8478260869565217,
+          "ring_f1": 0.7358490566037735
+        },
+        {
+          "threshold": 0.07674994856591191,
+          "rings_flagged": 118,
+          "ring_tp": 78,
+          "ring_fp": 40,
+          "ring_fn": 14,
+          "ring_precision": 0.6610169491525424,
+          "ring_recall": 0.8478260869565217,
+          "ring_f1": 0.7428571428571429
+        },
+        {
+          "threshold": 0.08038624754496555,
+          "rings_flagged": 115,
+          "ring_tp": 76,
+          "ring_fp": 39,
+          "ring_fn": 16,
+          "ring_precision": 0.6608695652173913,
+          "ring_recall": 0.8260869565217391,
+          "ring_f1": 0.7342995169082125
+        },
+        {
+          "threshold": 0.08565599012631366,
+          "rings_flagged": 113,
+          "ring_tp": 74,
+          "ring_fp": 39,
+          "ring_fn": 18,
+          "ring_precision": 0.6548672566371682,
+          "ring_recall": 0.8043478260869565,
+          "ring_f1": 0.7219512195121951
+        },
+        {
+          "threshold": 0.0867817322412049,
+          "rings_flagged": 110,
+          "ring_tp": 74,
+          "ring_fp": 36,
+          "ring_fn": 18,
+          "ring_precision": 0.6727272727272727,
+          "ring_recall": 0.8043478260869565,
+          "ring_f1": 0.7326732673267325
+        },
+        {
+          "threshold": 0.08929404868848834,
+          "rings_flagged": 108,
+          "ring_tp": 73,
+          "ring_fp": 35,
+          "ring_fn": 19,
+          "ring_precision": 0.6759259259259259,
+          "ring_recall": 0.7934782608695652,
+          "ring_f1": 0.7300000000000001
+        },
+        {
+          "threshold": 0.10400244553890417,
+          "rings_flagged": 105,
+          "ring_tp": 73,
+          "ring_fp": 32,
+          "ring_fn": 19,
+          "ring_precision": 0.6952380952380952,
+          "ring_recall": 0.7934782608695652,
+          "ring_f1": 0.7411167512690355
+        },
+        {
+          "threshold": 0.10588297950688004,
+          "rings_flagged": 102,
+          "ring_tp": 72,
+          "ring_fp": 30,
+          "ring_fn": 20,
+          "ring_precision": 0.7058823529411765,
+          "ring_recall": 0.782608695652174,
+          "ring_f1": 0.7422680412371134
+        },
+        {
+          "threshold": 0.11231116033751551,
+          "rings_flagged": 100,
+          "ring_tp": 72,
+          "ring_fp": 28,
+          "ring_fn": 20,
+          "ring_precision": 0.72,
+          "ring_recall": 0.782608695652174,
+          "ring_f1": 0.7499999999999999
+        },
+        {
+          "threshold": 0.12178970589163923,
+          "rings_flagged": 97,
+          "ring_tp": 71,
+          "ring_fp": 26,
+          "ring_fn": 21,
+          "ring_precision": 0.7319587628865979,
+          "ring_recall": 0.7717391304347826,
+          "ring_f1": 0.7513227513227513
+        },
+        {
+          "threshold": 0.13103163473699012,
+          "rings_flagged": 95,
+          "ring_tp": 70,
+          "ring_fp": 25,
+          "ring_fn": 22,
+          "ring_precision": 0.7368421052631579,
+          "ring_recall": 0.7608695652173914,
+          "ring_f1": 0.7486631016042781
+        },
+        {
+          "threshold": 0.14319168518458342,
+          "rings_flagged": 92,
+          "ring_tp": 69,
+          "ring_fp": 23,
+          "ring_fn": 23,
+          "ring_precision": 0.75,
+          "ring_recall": 0.75,
+          "ring_f1": 0.75
+        },
+        {
+          "threshold": 0.15847511067994627,
+          "rings_flagged": 90,
+          "ring_tp": 69,
+          "ring_fp": 21,
+          "ring_fn": 23,
+          "ring_precision": 0.7666666666666667,
+          "ring_recall": 0.75,
+          "ring_f1": 0.7582417582417583
+        },
+        {
+          "threshold": 0.17065930874343255,
+          "rings_flagged": 87,
+          "ring_tp": 67,
+          "ring_fp": 20,
+          "ring_fn": 25,
+          "ring_precision": 0.7701149425287356,
+          "ring_recall": 0.7282608695652174,
+          "ring_f1": 0.7486033519553073
+        },
+        {
+          "threshold": 0.1870061637211119,
+          "rings_flagged": 85,
+          "ring_tp": 66,
+          "ring_fp": 19,
+          "ring_fn": 26,
+          "ring_precision": 0.7764705882352941,
+          "ring_recall": 0.717391304347826,
+          "ring_f1": 0.7457627118644068
+        },
+        {
+          "threshold": 0.19424898061803475,
+          "rings_flagged": 82,
+          "ring_tp": 65,
+          "ring_fp": 17,
+          "ring_fn": 27,
+          "ring_precision": 0.7926829268292683,
+          "ring_recall": 0.7065217391304348,
+          "ring_f1": 0.7471264367816093
+        },
+        {
+          "threshold": 0.20615949944357523,
+          "rings_flagged": 80,
+          "ring_tp": 63,
+          "ring_fp": 17,
+          "ring_fn": 29,
+          "ring_precision": 0.7875,
+          "ring_recall": 0.6847826086956522,
+          "ring_f1": 0.7325581395348837
+        },
+        {
+          "threshold": 0.2168838128150305,
+          "rings_flagged": 77,
+          "ring_tp": 62,
+          "ring_fp": 15,
+          "ring_fn": 30,
+          "ring_precision": 0.8051948051948052,
+          "ring_recall": 0.6739130434782609,
+          "ring_f1": 0.7337278106508877
+        },
+        {
+          "threshold": 0.22250619546294062,
+          "rings_flagged": 75,
+          "ring_tp": 62,
+          "ring_fp": 13,
+          "ring_fn": 30,
+          "ring_precision": 0.8266666666666667,
+          "ring_recall": 0.6739130434782609,
+          "ring_f1": 0.7425149700598803
+        },
+        {
+          "threshold": 0.23590752009398347,
+          "rings_flagged": 72,
+          "ring_tp": 61,
+          "ring_fp": 11,
+          "ring_fn": 31,
+          "ring_precision": 0.8472222222222222,
+          "ring_recall": 0.6630434782608695,
+          "ring_f1": 0.7439024390243902
+        },
+        {
+          "threshold": 0.2574544040775506,
+          "rings_flagged": 69,
+          "ring_tp": 59,
+          "ring_fp": 10,
+          "ring_fn": 33,
+          "ring_precision": 0.855072463768116,
+          "ring_recall": 0.6413043478260869,
+          "ring_f1": 0.7329192546583851
+        },
+        {
+          "threshold": 0.26286722330634227,
+          "rings_flagged": 67,
+          "ring_tp": 57,
+          "ring_fp": 10,
+          "ring_fn": 35,
+          "ring_precision": 0.8507462686567164,
+          "ring_recall": 0.6195652173913043,
+          "ring_f1": 0.7169811320754718
+        },
+        {
+          "threshold": 0.27859625637119034,
+          "rings_flagged": 64,
+          "ring_tp": 54,
+          "ring_fp": 10,
+          "ring_fn": 38,
+          "ring_precision": 0.84375,
+          "ring_recall": 0.5869565217391305,
+          "ring_f1": 0.6923076923076924
+        },
+        {
+          "threshold": 0.2897954012804526,
+          "rings_flagged": 62,
+          "ring_tp": 53,
+          "ring_fp": 9,
+          "ring_fn": 39,
+          "ring_precision": 0.8548387096774194,
+          "ring_recall": 0.5760869565217391,
+          "ring_f1": 0.6883116883116883
+        },
+        {
+          "threshold": 0.2991375414509635,
+          "rings_flagged": 59,
+          "ring_tp": 52,
+          "ring_fp": 7,
+          "ring_fn": 40,
+          "ring_precision": 0.8813559322033898,
+          "ring_recall": 0.5652173913043478,
+          "ring_f1": 0.6887417218543046
+        },
+        {
+          "threshold": 0.33206398617286426,
+          "rings_flagged": 57,
+          "ring_tp": 50,
+          "ring_fp": 7,
+          "ring_fn": 42,
+          "ring_precision": 0.8771929824561403,
+          "ring_recall": 0.5434782608695652,
+          "ring_f1": 0.6711409395973155
+        },
+        {
+          "threshold": 0.3542068696498791,
+          "rings_flagged": 54,
+          "ring_tp": 48,
+          "ring_fp": 6,
+          "ring_fn": 44,
+          "ring_precision": 0.8888888888888888,
+          "ring_recall": 0.5217391304347826,
+          "ring_f1": 0.6575342465753423
+        },
+        {
+          "threshold": 0.3903939487107349,
+          "rings_flagged": 52,
+          "ring_tp": 46,
+          "ring_fp": 6,
+          "ring_fn": 46,
+          "ring_precision": 0.8846153846153846,
+          "ring_recall": 0.5,
+          "ring_f1": 0.6388888888888888
+        },
+        {
+          "threshold": 0.3988753028809043,
+          "rings_flagged": 49,
+          "ring_tp": 43,
+          "ring_fp": 6,
+          "ring_fn": 49,
+          "ring_precision": 0.8775510204081632,
+          "ring_recall": 0.4673913043478261,
+          "ring_f1": 0.6099290780141844
+        },
+        {
+          "threshold": 0.4034422331958186,
+          "rings_flagged": 47,
+          "ring_tp": 42,
+          "ring_fp": 5,
+          "ring_fn": 50,
+          "ring_precision": 0.8936170212765957,
+          "ring_recall": 0.45652173913043476,
+          "ring_f1": 0.6043165467625898
+        },
+        {
+          "threshold": 0.43652719667977163,
+          "rings_flagged": 44,
+          "ring_tp": 40,
+          "ring_fp": 4,
+          "ring_fn": 52,
+          "ring_precision": 0.9090909090909091,
+          "ring_recall": 0.43478260869565216,
+          "ring_f1": 0.5882352941176471
+        },
+        {
+          "threshold": 0.46398283788062133,
+          "rings_flagged": 42,
+          "ring_tp": 39,
+          "ring_fp": 3,
+          "ring_fn": 53,
+          "ring_precision": 0.9285714285714286,
+          "ring_recall": 0.42391304347826086,
+          "ring_f1": 0.582089552238806
+        },
+        {
+          "threshold": 0.4926512024322696,
+          "rings_flagged": 39,
+          "ring_tp": 37,
+          "ring_fp": 2,
+          "ring_fn": 55,
+          "ring_precision": 0.9487179487179487,
+          "ring_recall": 0.40217391304347827,
+          "ring_f1": 0.564885496183206
+        },
+        {
+          "threshold": 0.5091378527990238,
+          "rings_flagged": 36,
+          "ring_tp": 34,
+          "ring_fp": 2,
+          "ring_fn": 58,
+          "ring_precision": 0.9444444444444444,
+          "ring_recall": 0.3695652173913043,
+          "ring_f1": 0.53125
+        },
+        {
+          "threshold": 0.5217995055003305,
+          "rings_flagged": 34,
+          "ring_tp": 33,
+          "ring_fp": 1,
+          "ring_fn": 59,
+          "ring_precision": 0.9705882352941176,
+          "ring_recall": 0.358695652173913,
+          "ring_f1": 0.5238095238095238
+        },
+        {
+          "threshold": 0.5627629013981315,
+          "rings_flagged": 31,
+          "ring_tp": 30,
+          "ring_fp": 1,
+          "ring_fn": 62,
+          "ring_precision": 0.967741935483871,
+          "ring_recall": 0.32608695652173914,
+          "ring_f1": 0.4878048780487805
+        },
+        {
+          "threshold": 0.6129779670397043,
+          "rings_flagged": 29,
+          "ring_tp": 28,
+          "ring_fp": 1,
+          "ring_fn": 64,
+          "ring_precision": 0.9655172413793104,
+          "ring_recall": 0.30434782608695654,
+          "ring_f1": 0.46280991735537186
+        },
+        {
+          "threshold": 0.6444100817363365,
+          "rings_flagged": 26,
+          "ring_tp": 25,
+          "ring_fp": 1,
+          "ring_fn": 67,
+          "ring_precision": 0.9615384615384616,
+          "ring_recall": 0.2717391304347826,
+          "ring_f1": 0.42372881355932207
+        },
+        {
+          "threshold": 0.657120029997504,
+          "rings_flagged": 24,
+          "ring_tp": 23,
+          "ring_fp": 1,
+          "ring_fn": 69,
+          "ring_precision": 0.9583333333333334,
+          "ring_recall": 0.25,
+          "ring_f1": 0.396551724137931
+        },
+        {
+          "threshold": 0.7068224815127371,
+          "rings_flagged": 21,
+          "ring_tp": 20,
+          "ring_fp": 1,
+          "ring_fn": 72,
+          "ring_precision": 0.9523809523809523,
+          "ring_recall": 0.21739130434782608,
+          "ring_f1": 0.3539823008849557
+        },
+        {
+          "threshold": 0.780904448513078,
+          "rings_flagged": 19,
+          "ring_tp": 18,
+          "ring_fp": 1,
+          "ring_fn": 74,
+          "ring_precision": 0.9473684210526315,
+          "ring_recall": 0.1956521739130435,
+          "ring_f1": 0.3243243243243243
+        },
+        {
+          "threshold": 0.8500505352357984,
+          "rings_flagged": 16,
+          "ring_tp": 15,
+          "ring_fp": 1,
+          "ring_fn": 77,
+          "ring_precision": 0.9375,
+          "ring_recall": 0.16304347826086957,
+          "ring_f1": 0.27777777777777773
+        },
+        {
+          "threshold": 0.8843755990218527,
+          "rings_flagged": 14,
+          "ring_tp": 14,
+          "ring_fp": 0,
+          "ring_fn": 78,
+          "ring_precision": 1.0,
+          "ring_recall": 0.15217391304347827,
+          "ring_f1": 0.2641509433962264
+        },
+        {
+          "threshold": 0.9078582032713209,
+          "rings_flagged": 11,
+          "ring_tp": 11,
+          "ring_fp": 0,
+          "ring_fn": 81,
+          "ring_precision": 1.0,
+          "ring_recall": 0.11956521739130435,
+          "ring_f1": 0.21359223300970873
+        },
+        {
+          "threshold": 0.9274071279240217,
+          "rings_flagged": 9,
+          "ring_tp": 9,
+          "ring_fp": 0,
+          "ring_fn": 83,
+          "ring_precision": 1.0,
+          "ring_recall": 0.09782608695652174,
+          "ring_f1": 0.17821782178217824
+        },
+        {
+          "threshold": 0.952615717447761,
+          "rings_flagged": 6,
+          "ring_tp": 6,
+          "ring_fp": 0,
+          "ring_fn": 86,
+          "ring_precision": 1.0,
+          "ring_recall": 0.06521739130434782,
+          "ring_f1": 0.12244897959183672
+        },
+        {
+          "threshold": 0.9883327974612254,
+          "rings_flagged": 3,
+          "ring_tp": 3,
+          "ring_fp": 0,
+          "ring_fn": 89,
+          "ring_precision": 1.0,
+          "ring_recall": 0.03260869565217391,
+          "ring_f1": 0.06315789473684211
+        },
+        {
+          "threshold": 0.9978415779833405,
+          "rings_flagged": 1,
+          "ring_tp": 1,
+          "ring_fp": 0,
+          "ring_fn": 91,
+          "ring_precision": 1.0,
+          "ring_recall": 0.010869565217391304,
+          "ring_f1": 0.02150537634408602
+        }
+      ]
+    },
+    "address": {
+      "groups": 586,
+      "true_fraud_rings": 42,
+      "ring_threshold": 0.06797623717513268,
+      "threshold": 0.06797623717513268,
+      "rings_flagged": 40,
+      "ring_tp": 17,
+      "ring_fp": 23,
+      "ring_fn": 25,
+      "ring_precision": 0.425,
+      "ring_recall": 0.40476190476190477,
+      "ring_f1": 0.41463414634146345,
+      "val_tuning": {
+        "threshold": 0.06797623717513268,
+        "rings_flagged": 41,
+        "ring_tp": 20,
+        "ring_fp": 21,
+        "ring_fn": 13,
+        "ring_precision": 0.4878048780487805,
+        "ring_recall": 0.6060606060606061,
+        "ring_f1": 0.5405405405405406
+      },
+      "fraud_txns_in_this_ring_type": 242,
+      "fraud_txns_covered_by_flagged": 111,
+      "fraud_coverage_pct_of_all_fraud": 0.03600389231268245,
+      "bonus_fraud_below_txn_threshold": 0,
+      "curve": [
+        {
+          "threshold": 0.0039177127958427245,
+          "rings_flagged": 410,
+          "ring_tp": 39,
+          "ring_fp": 371,
+          "ring_fn": 3,
+          "ring_precision": 0.0951219512195122,
+          "ring_recall": 0.9285714285714286,
+          "ring_f1": 0.17256637168141592
+        },
+        {
+          "threshold": 0.003990719099505448,
+          "rings_flagged": 407,
+          "ring_tp": 39,
+          "ring_fp": 368,
+          "ring_fn": 3,
+          "ring_precision": 0.09582309582309582,
+          "ring_recall": 0.9285714285714286,
+          "ring_f1": 0.17371937639198218
+        },
+        {
+          "threshold": 0.004062005832345489,
+          "rings_flagged": 403,
+          "ring_tp": 38,
+          "ring_fp": 365,
+          "ring_fn": 4,
+          "ring_precision": 0.09429280397022333,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.1707865168539326
+        },
+        {
+          "threshold": 0.004104152993130633,
+          "rings_flagged": 400,
+          "ring_tp": 38,
+          "ring_fp": 362,
+          "ring_fn": 4,
+          "ring_precision": 0.095,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.1719457013574661
+        },
+        {
+          "threshold": 0.004204017149631418,
+          "rings_flagged": 396,
+          "ring_tp": 38,
+          "ring_fp": 358,
+          "ring_fn": 4,
+          "ring_precision": 0.09595959595959595,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.1735159817351598
+        },
+        {
+          "threshold": 0.004246171038759036,
+          "rings_flagged": 393,
+          "ring_tp": 38,
+          "ring_fp": 355,
+          "ring_fn": 4,
+          "ring_precision": 0.09669211195928754,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.17471264367816094
+        },
+        {
+          "threshold": 0.0042969604890672275,
+          "rings_flagged": 389,
+          "ring_tp": 38,
+          "ring_fp": 351,
+          "ring_fn": 4,
+          "ring_precision": 0.09768637532133675,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.17633410672853828
+        },
+        {
+          "threshold": 0.004329189129124106,
+          "rings_flagged": 386,
+          "ring_tp": 38,
+          "ring_fp": 348,
+          "ring_fn": 4,
+          "ring_precision": 0.09844559585492228,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.17757009345794394
+        },
+        {
+          "threshold": 0.004381094467673114,
+          "rings_flagged": 383,
+          "ring_tp": 38,
+          "ring_fp": 345,
+          "ring_fn": 4,
+          "ring_precision": 0.09921671018276762,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.17882352941176471
+        },
+        {
+          "threshold": 0.004463579665813792,
+          "rings_flagged": 379,
+          "ring_tp": 38,
+          "ring_fp": 341,
+          "ring_fn": 4,
+          "ring_precision": 0.10026385224274406,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.18052256532066507
+        },
+        {
+          "threshold": 0.00451765633538997,
+          "rings_flagged": 376,
+          "ring_tp": 38,
+          "ring_fp": 338,
+          "ring_fn": 4,
+          "ring_precision": 0.10106382978723404,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.18181818181818182
+        },
+        {
+          "threshold": 0.004583317526161581,
+          "rings_flagged": 372,
+          "ring_tp": 38,
+          "ring_fp": 334,
+          "ring_fn": 4,
+          "ring_precision": 0.10215053763440861,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.18357487922705315
+        },
+        {
+          "threshold": 0.004682430332888537,
+          "rings_flagged": 369,
+          "ring_tp": 38,
+          "ring_fp": 331,
+          "ring_fn": 4,
+          "ring_precision": 0.10298102981029811,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.18491484184914841
+        },
+        {
+          "threshold": 0.004734174246939906,
+          "rings_flagged": 365,
+          "ring_tp": 38,
+          "ring_fp": 327,
+          "ring_fn": 4,
+          "ring_precision": 0.10410958904109589,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.18673218673218675
+        },
+        {
+          "threshold": 0.004792987116509927,
+          "rings_flagged": 362,
+          "ring_tp": 38,
+          "ring_fp": 324,
+          "ring_fn": 4,
+          "ring_precision": 0.10497237569060773,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.18811881188118812
+        },
+        {
+          "threshold": 0.004886700789953297,
+          "rings_flagged": 358,
+          "ring_tp": 38,
+          "ring_fp": 320,
+          "ring_fn": 4,
+          "ring_precision": 0.10614525139664804,
+          "ring_recall": 0.9047619047619048,
+          "ring_f1": 0.19
+        },
+        {
+          "threshold": 0.004974853340365813,
+          "rings_flagged": 355,
+          "ring_tp": 37,
+          "ring_fp": 318,
+          "ring_fn": 5,
+          "ring_precision": 0.10422535211267606,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.18639798488664988
+        },
+        {
+          "threshold": 0.005063857560176457,
+          "rings_flagged": 352,
+          "ring_tp": 37,
+          "ring_fp": 315,
+          "ring_fn": 5,
+          "ring_precision": 0.10511363636363637,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.18781725888324874
+        },
+        {
+          "threshold": 0.005193587295450329,
+          "rings_flagged": 348,
+          "ring_tp": 37,
+          "ring_fp": 311,
+          "ring_fn": 5,
+          "ring_precision": 0.10632183908045977,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.1897435897435897
+        },
+        {
+          "threshold": 0.005220439498028207,
+          "rings_flagged": 345,
+          "ring_tp": 37,
+          "ring_fp": 308,
+          "ring_fn": 5,
+          "ring_precision": 0.1072463768115942,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.19121447028423771
+        },
+        {
+          "threshold": 0.005315858803844173,
+          "rings_flagged": 341,
+          "ring_tp": 37,
+          "ring_fp": 304,
+          "ring_fn": 5,
+          "ring_precision": 0.10850439882697947,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.19321148825065274
+        },
+        {
+          "threshold": 0.005415373752989937,
+          "rings_flagged": 338,
+          "ring_tp": 37,
+          "ring_fp": 301,
+          "ring_fn": 5,
+          "ring_precision": 0.10946745562130178,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.19473684210526315
+        },
+        {
+          "threshold": 0.005506168179150185,
+          "rings_flagged": 334,
+          "ring_tp": 37,
+          "ring_fp": 297,
+          "ring_fn": 5,
+          "ring_precision": 0.11077844311377245,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.19680851063829785
+        },
+        {
+          "threshold": 0.005625396686130078,
+          "rings_flagged": 331,
+          "ring_tp": 37,
+          "ring_fp": 294,
+          "ring_fn": 5,
+          "ring_precision": 0.11178247734138973,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.19839142091152817
+        },
+        {
+          "threshold": 0.0056765544497436645,
+          "rings_flagged": 328,
+          "ring_tp": 37,
+          "ring_fp": 291,
+          "ring_fn": 5,
+          "ring_precision": 0.11280487804878049,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.2
+        },
+        {
+          "threshold": 0.005776793456500186,
+          "rings_flagged": 324,
+          "ring_tp": 37,
+          "ring_fp": 287,
+          "ring_fn": 5,
+          "ring_precision": 0.11419753086419752,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.20218579234972678
+        },
+        {
+          "threshold": 0.005953665146043143,
+          "rings_flagged": 321,
+          "ring_tp": 37,
+          "ring_fp": 284,
+          "ring_fn": 5,
+          "ring_precision": 0.11526479750778816,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.20385674931129474
+        },
+        {
+          "threshold": 0.0061304023702849954,
+          "rings_flagged": 317,
+          "ring_tp": 37,
+          "ring_fp": 280,
+          "ring_fn": 5,
+          "ring_precision": 0.1167192429022082,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.20612813370473537
+        },
+        {
+          "threshold": 0.006299851716501676,
+          "rings_flagged": 314,
+          "ring_tp": 37,
+          "ring_fp": 277,
+          "ring_fn": 5,
+          "ring_precision": 0.1178343949044586,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.20786516853932585
+        },
+        {
+          "threshold": 0.006388422525436326,
+          "rings_flagged": 310,
+          "ring_tp": 37,
+          "ring_fp": 273,
+          "ring_fn": 5,
+          "ring_precision": 0.11935483870967742,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.2102272727272727
+        },
+        {
+          "threshold": 0.006434143274663545,
+          "rings_flagged": 307,
+          "ring_tp": 37,
+          "ring_fp": 270,
+          "ring_fn": 5,
+          "ring_precision": 0.12052117263843648,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.21203438395415472
+        },
+        {
+          "threshold": 0.006599381002925256,
+          "rings_flagged": 303,
+          "ring_tp": 37,
+          "ring_fp": 266,
+          "ring_fn": 5,
+          "ring_precision": 0.12211221122112212,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.2144927536231884
+        },
+        {
+          "threshold": 0.0066414535734762485,
+          "rings_flagged": 300,
+          "ring_tp": 37,
+          "ring_fp": 263,
+          "ring_fn": 5,
+          "ring_precision": 0.12333333333333334,
+          "ring_recall": 0.8809523809523809,
+          "ring_f1": 0.21637426900584797
+        },
+        {
+          "threshold": 0.006732553485854702,
+          "rings_flagged": 297,
+          "ring_tp": 36,
+          "ring_fp": 261,
+          "ring_fn": 6,
+          "ring_precision": 0.12121212121212122,
+          "ring_recall": 0.8571428571428571,
+          "ring_f1": 0.21238938053097345
+        },
+        {
+          "threshold": 0.0068689843640358655,
+          "rings_flagged": 293,
+          "ring_tp": 36,
+          "ring_fp": 257,
+          "ring_fn": 6,
+          "ring_precision": 0.12286689419795221,
+          "ring_recall": 0.8571428571428571,
+          "ring_f1": 0.21492537313432836
+        },
+        {
+          "threshold": 0.007037991513161064,
+          "rings_flagged": 290,
+          "ring_tp": 36,
+          "ring_fp": 254,
+          "ring_fn": 6,
+          "ring_precision": 0.12413793103448276,
+          "ring_recall": 0.8571428571428571,
+          "ring_f1": 0.21686746987951805
+        },
+        {
+          "threshold": 0.007106799516318248,
+          "rings_flagged": 286,
+          "ring_tp": 36,
+          "ring_fp": 250,
+          "ring_fn": 6,
+          "ring_precision": 0.1258741258741259,
+          "ring_recall": 0.8571428571428571,
+          "ring_f1": 0.21951219512195125
+        },
+        {
+          "threshold": 0.007179049001036988,
+          "rings_flagged": 283,
+          "ring_tp": 36,
+          "ring_fp": 247,
+          "ring_fn": 6,
+          "ring_precision": 0.127208480565371,
+          "ring_recall": 0.8571428571428571,
+          "ring_f1": 0.2215384615384615
+        },
+        {
+          "threshold": 0.007331946734552593,
+          "rings_flagged": 279,
+          "ring_tp": 36,
+          "ring_fp": 243,
+          "ring_fn": 6,
+          "ring_precision": 0.12903225806451613,
+          "ring_recall": 0.8571428571428571,
+          "ring_f1": 0.22429906542056074
+        },
+        {
+          "threshold": 0.0073978342791382315,
+          "rings_flagged": 276,
+          "ring_tp": 36,
+          "ring_fp": 240,
+          "ring_fn": 6,
+          "ring_precision": 0.13043478260869565,
+          "ring_recall": 0.8571428571428571,
+          "ring_f1": 0.22641509433962262
+        },
+        {
+          "threshold": 0.007557919606851975,
+          "rings_flagged": 273,
+          "ring_tp": 35,
+          "ring_fp": 238,
+          "ring_fn": 7,
+          "ring_precision": 0.1282051282051282,
+          "ring_recall": 0.8333333333333334,
+          "ring_f1": 0.2222222222222222
+        },
+        {
+          "threshold": 0.007744094986593324,
+          "rings_flagged": 269,
+          "ring_tp": 35,
+          "ring_fp": 234,
+          "ring_fn": 7,
+          "ring_precision": 0.13011152416356878,
+          "ring_recall": 0.8333333333333334,
+          "ring_f1": 0.22508038585209003
+        },
+        {
+          "threshold": 0.007966460922473474,
+          "rings_flagged": 266,
+          "ring_tp": 35,
+          "ring_fp": 231,
+          "ring_fn": 7,
+          "ring_precision": 0.13157894736842105,
+          "ring_recall": 0.8333333333333334,
+          "ring_f1": 0.22727272727272727
+        },
+        {
+          "threshold": 0.008060567514966486,
+          "rings_flagged": 262,
+          "ring_tp": 35,
+          "ring_fp": 227,
+          "ring_fn": 7,
+          "ring_precision": 0.13358778625954199,
+          "ring_recall": 0.8333333333333334,
+          "ring_f1": 0.23026315789473686
+        },
+        {
+          "threshold": 0.008131533157634636,
+          "rings_flagged": 259,
+          "ring_tp": 35,
+          "ring_fp": 224,
+          "ring_fn": 7,
+          "ring_precision": 0.13513513513513514,
+          "ring_recall": 0.8333333333333334,
+          "ring_f1": 0.23255813953488372
+        },
+        {
+          "threshold": 0.008198794439876898,
+          "rings_flagged": 255,
+          "ring_tp": 35,
+          "ring_fp": 220,
+          "ring_fn": 7,
+          "ring_precision": 0.13725490196078433,
+          "ring_recall": 0.8333333333333334,
+          "ring_f1": 0.23569023569023567
+        },
+        {
+          "threshold": 0.00828141234843308,
+          "rings_flagged": 252,
+          "ring_tp": 35,
+          "ring_fp": 217,
+          "ring_fn": 7,
+          "ring_precision": 0.1388888888888889,
+          "ring_recall": 0.8333333333333334,
+          "ring_f1": 0.2380952380952381
+        },
+        {
+          "threshold": 0.008328619020904385,
+          "rings_flagged": 248,
+          "ring_tp": 35,
+          "ring_fp": 213,
+          "ring_fn": 7,
+          "ring_precision": 0.14112903225806453,
+          "ring_recall": 0.8333333333333334,
+          "ring_f1": 0.24137931034482762
+        },
+        {
+          "threshold": 0.008383964832198066,
+          "rings_flagged": 245,
+          "ring_tp": 35,
+          "ring_fp": 210,
+          "ring_fn": 7,
+          "ring_precision": 0.14285714285714285,
+          "ring_recall": 0.8333333333333334,
+          "ring_f1": 0.2439024390243902
+        },
+        {
+          "threshold": 0.008453760937453605,
+          "rings_flagged": 242,
+          "ring_tp": 35,
+          "ring_fp": 207,
+          "ring_fn": 7,
+          "ring_precision": 0.1446280991735537,
+          "ring_recall": 0.8333333333333334,
+          "ring_f1": 0.24647887323943662
+        },
+        {
+          "threshold": 0.008499316546177645,
+          "rings_flagged": 238,
+          "ring_tp": 35,
+          "ring_fp": 203,
+          "ring_fn": 7,
+          "ring_precision": 0.14705882352941177,
+          "ring_recall": 0.8333333333333334,
+          "ring_f1": 0.25
+        },
+        {
+          "threshold": 0.008603647430509731,
+          "rings_flagged": 235,
+          "ring_tp": 34,
+          "ring_fp": 201,
+          "ring_fn": 8,
+          "ring_precision": 0.14468085106382977,
+          "ring_recall": 0.8095238095238095,
+          "ring_f1": 0.2454873646209386
+        },
+        {
+          "threshold": 0.008821008152999826,
+          "rings_flagged": 231,
+          "ring_tp": 34,
+          "ring_fp": 197,
+          "ring_fn": 8,
+          "ring_precision": 0.1471861471861472,
+          "ring_recall": 0.8095238095238095,
+          "ring_f1": 0.2490842490842491
+        },
+        {
+          "threshold": 0.008955254296604365,
+          "rings_flagged": 228,
+          "ring_tp": 34,
+          "ring_fp": 194,
+          "ring_fn": 8,
+          "ring_precision": 0.14912280701754385,
+          "ring_recall": 0.8095238095238095,
+          "ring_f1": 0.2518518518518518
+        },
+        {
+          "threshold": 0.009196069728921128,
+          "rings_flagged": 224,
+          "ring_tp": 34,
+          "ring_fp": 190,
+          "ring_fn": 8,
+          "ring_precision": 0.15178571428571427,
+          "ring_recall": 0.8095238095238095,
+          "ring_f1": 0.2556390977443609
+        },
+        {
+          "threshold": 0.009254244044193342,
+          "rings_flagged": 221,
+          "ring_tp": 34,
+          "ring_fp": 187,
+          "ring_fn": 8,
+          "ring_precision": 0.15384615384615385,
+          "ring_recall": 0.8095238095238095,
+          "ring_f1": 0.2585551330798479
+        },
+        {
+          "threshold": 0.009446814537013574,
+          "rings_flagged": 218,
+          "ring_tp": 33,
+          "ring_fp": 185,
+          "ring_fn": 9,
+          "ring_precision": 0.15137614678899083,
+          "ring_recall": 0.7857142857142857,
+          "ring_f1": 0.25384615384615383
+        },
+        {
+          "threshold": 0.009651013848759027,
+          "rings_flagged": 214,
+          "ring_tp": 32,
+          "ring_fp": 182,
+          "ring_fn": 10,
+          "ring_precision": 0.14953271028037382,
+          "ring_recall": 0.7619047619047619,
+          "ring_f1": 0.24999999999999997
+        },
+        {
+          "threshold": 0.009894884861466727,
+          "rings_flagged": 211,
+          "ring_tp": 32,
+          "ring_fp": 179,
+          "ring_fn": 10,
+          "ring_precision": 0.15165876777251186,
+          "ring_recall": 0.7619047619047619,
+          "ring_f1": 0.25296442687747034
+        },
+        {
+          "threshold": 0.01013249072600965,
+          "rings_flagged": 207,
+          "ring_tp": 32,
+          "ring_fp": 175,
+          "ring_fn": 10,
+          "ring_precision": 0.15458937198067632,
+          "ring_recall": 0.7619047619047619,
+          "ring_f1": 0.2570281124497992
+        },
+        {
+          "threshold": 0.010405691643023162,
+          "rings_flagged": 204,
+          "ring_tp": 32,
+          "ring_fp": 172,
+          "ring_fn": 10,
+          "ring_precision": 0.1568627450980392,
+          "ring_recall": 0.7619047619047619,
+          "ring_f1": 0.26016260162601623
+        },
+        {
+          "threshold": 0.01063736390541409,
+          "rings_flagged": 200,
+          "ring_tp": 31,
+          "ring_fp": 169,
+          "ring_fn": 11,
+          "ring_precision": 0.155,
+          "ring_recall": 0.7380952380952381,
+          "ring_f1": 0.256198347107438
+        },
+        {
+          "threshold": 0.010964806178772518,
+          "rings_flagged": 197,
+          "ring_tp": 31,
+          "ring_fp": 166,
+          "ring_fn": 11,
+          "ring_precision": 0.15736040609137056,
+          "ring_recall": 0.7380952380952381,
+          "ring_f1": 0.2594142259414226
+        },
+        {
+          "threshold": 0.011133898752294459,
+          "rings_flagged": 194,
+          "ring_tp": 31,
+          "ring_fp": 163,
+          "ring_fn": 11,
+          "ring_precision": 0.15979381443298968,
+          "ring_recall": 0.7380952380952381,
+          "ring_f1": 0.2627118644067796
+        },
+        {
+          "threshold": 0.01136485385096056,
+          "rings_flagged": 190,
+          "ring_tp": 31,
+          "ring_fp": 159,
+          "ring_fn": 11,
+          "ring_precision": 0.1631578947368421,
+          "ring_recall": 0.7380952380952381,
+          "ring_f1": 0.2672413793103448
+        },
+        {
+          "threshold": 0.011483729470535458,
+          "rings_flagged": 187,
+          "ring_tp": 31,
+          "ring_fp": 156,
+          "ring_fn": 11,
+          "ring_precision": 0.1657754010695187,
+          "ring_recall": 0.7380952380952381,
+          "ring_f1": 0.2707423580786026
+        },
+        {
+          "threshold": 0.011584444981206594,
+          "rings_flagged": 183,
+          "ring_tp": 31,
+          "ring_fp": 152,
+          "ring_fn": 11,
+          "ring_precision": 0.16939890710382513,
+          "ring_recall": 0.7380952380952381,
+          "ring_f1": 0.27555555555555555
+        },
+        {
+          "threshold": 0.011861825763974864,
+          "rings_flagged": 180,
+          "ring_tp": 31,
+          "ring_fp": 149,
+          "ring_fn": 11,
+          "ring_precision": 0.17222222222222222,
+          "ring_recall": 0.7380952380952381,
+          "ring_f1": 0.27927927927927926
+        },
+        {
+          "threshold": 0.01228255412822294,
+          "rings_flagged": 176,
+          "ring_tp": 30,
+          "ring_fp": 146,
+          "ring_fn": 12,
+          "ring_precision": 0.17045454545454544,
+          "ring_recall": 0.7142857142857143,
+          "ring_f1": 0.27522935779816515
+        },
+        {
+          "threshold": 0.012707485000730403,
+          "rings_flagged": 173,
+          "ring_tp": 30,
+          "ring_fp": 143,
+          "ring_fn": 12,
+          "ring_precision": 0.17341040462427745,
+          "ring_recall": 0.7142857142857143,
+          "ring_f1": 0.27906976744186046
+        },
+        {
+          "threshold": 0.013022762729510707,
+          "rings_flagged": 169,
+          "ring_tp": 30,
+          "ring_fp": 139,
+          "ring_fn": 12,
+          "ring_precision": 0.17751479289940827,
+          "ring_recall": 0.7142857142857143,
+          "ring_f1": 0.28436018957345965
+        },
+        {
+          "threshold": 0.013556939208097049,
+          "rings_flagged": 166,
+          "ring_tp": 30,
+          "ring_fp": 136,
+          "ring_fn": 12,
+          "ring_precision": 0.18072289156626506,
+          "ring_recall": 0.7142857142857143,
+          "ring_f1": 0.2884615384615385
+        },
+        {
+          "threshold": 0.013862548063836086,
+          "rings_flagged": 163,
+          "ring_tp": 30,
+          "ring_fp": 133,
+          "ring_fn": 12,
+          "ring_precision": 0.18404907975460122,
+          "ring_recall": 0.7142857142857143,
+          "ring_f1": 0.2926829268292683
+        },
+        {
+          "threshold": 0.014185157416443692,
+          "rings_flagged": 159,
+          "ring_tp": 28,
+          "ring_fp": 131,
+          "ring_fn": 14,
+          "ring_precision": 0.1761006289308176,
+          "ring_recall": 0.6666666666666666,
+          "ring_f1": 0.27860696517412936
+        },
+        {
+          "threshold": 0.014560809030879468,
+          "rings_flagged": 156,
+          "ring_tp": 28,
+          "ring_fp": 128,
+          "ring_fn": 14,
+          "ring_precision": 0.1794871794871795,
+          "ring_recall": 0.6666666666666666,
+          "ring_f1": 0.2828282828282828
+        },
+        {
+          "threshold": 0.01545527443723378,
+          "rings_flagged": 152,
+          "ring_tp": 28,
+          "ring_fp": 124,
+          "ring_fn": 14,
+          "ring_precision": 0.18421052631578946,
+          "ring_recall": 0.6666666666666666,
+          "ring_f1": 0.28865979381443296
+        },
+        {
+          "threshold": 0.016017926260665956,
+          "rings_flagged": 149,
+          "ring_tp": 28,
+          "ring_fp": 121,
+          "ring_fn": 14,
+          "ring_precision": 0.18791946308724833,
+          "ring_recall": 0.6666666666666666,
+          "ring_f1": 0.2931937172774869
+        },
+        {
+          "threshold": 0.01629153581111827,
+          "rings_flagged": 145,
+          "ring_tp": 27,
+          "ring_fp": 118,
+          "ring_fn": 15,
+          "ring_precision": 0.18620689655172415,
+          "ring_recall": 0.6428571428571429,
+          "ring_f1": 0.2887700534759358
+        },
+        {
+          "threshold": 0.01689659006523247,
+          "rings_flagged": 142,
+          "ring_tp": 27,
+          "ring_fp": 115,
+          "ring_fn": 15,
+          "ring_precision": 0.19014084507042253,
+          "ring_recall": 0.6428571428571429,
+          "ring_f1": 0.29347826086956524
+        },
+        {
+          "threshold": 0.017056992998316308,
+          "rings_flagged": 139,
+          "ring_tp": 27,
+          "ring_fp": 112,
+          "ring_fn": 15,
+          "ring_precision": 0.19424460431654678,
+          "ring_recall": 0.6428571428571429,
+          "ring_f1": 0.2983425414364641
+        },
+        {
+          "threshold": 0.017398372238446574,
+          "rings_flagged": 135,
+          "ring_tp": 27,
+          "ring_fp": 108,
+          "ring_fn": 15,
+          "ring_precision": 0.2,
+          "ring_recall": 0.6428571428571429,
+          "ring_f1": 0.3050847457627119
+        },
+        {
+          "threshold": 0.01795530141940673,
+          "rings_flagged": 132,
+          "ring_tp": 27,
+          "ring_fp": 105,
+          "ring_fn": 15,
+          "ring_precision": 0.20454545454545456,
+          "ring_recall": 0.6428571428571429,
+          "ring_f1": 0.31034482758620696
+        },
+        {
+          "threshold": 0.018357275696321305,
+          "rings_flagged": 128,
+          "ring_tp": 27,
+          "ring_fp": 101,
+          "ring_fn": 15,
+          "ring_precision": 0.2109375,
+          "ring_recall": 0.6428571428571429,
+          "ring_f1": 0.3176470588235294
+        },
+        {
+          "threshold": 0.01866159258248745,
+          "rings_flagged": 125,
+          "ring_tp": 27,
+          "ring_fp": 98,
+          "ring_fn": 15,
+          "ring_precision": 0.216,
+          "ring_recall": 0.6428571428571429,
+          "ring_f1": 0.3233532934131737
+        },
+        {
+          "threshold": 0.019147190632754725,
+          "rings_flagged": 121,
+          "ring_tp": 27,
+          "ring_fp": 94,
+          "ring_fn": 15,
+          "ring_precision": 0.2231404958677686,
+          "ring_recall": 0.6428571428571429,
+          "ring_f1": 0.3312883435582822
+        },
+        {
+          "threshold": 0.019620178629679654,
+          "rings_flagged": 118,
+          "ring_tp": 27,
+          "ring_fp": 91,
+          "ring_fn": 15,
+          "ring_precision": 0.2288135593220339,
+          "ring_recall": 0.6428571428571429,
+          "ring_f1": 0.3375
+        },
+        {
+          "threshold": 0.021914216756153657,
+          "rings_flagged": 114,
+          "ring_tp": 26,
+          "ring_fp": 88,
+          "ring_fn": 16,
+          "ring_precision": 0.22807017543859648,
+          "ring_recall": 0.6190476190476191,
+          "ring_f1": 0.3333333333333333
+        },
+        {
+          "threshold": 0.022388942444750714,
+          "rings_flagged": 111,
+          "ring_tp": 26,
+          "ring_fp": 85,
+          "ring_fn": 16,
+          "ring_precision": 0.23423423423423423,
+          "ring_recall": 0.6190476190476191,
+          "ring_f1": 0.3398692810457516
+        },
+        {
+          "threshold": 0.02266535297296839,
+          "rings_flagged": 108,
+          "ring_tp": 26,
+          "ring_fp": 82,
+          "ring_fn": 16,
+          "ring_precision": 0.24074074074074073,
+          "ring_recall": 0.6190476190476191,
+          "ring_f1": 0.3466666666666667
+        },
+        {
+          "threshold": 0.023559204242196253,
+          "rings_flagged": 104,
+          "ring_tp": 25,
+          "ring_fp": 79,
+          "ring_fn": 17,
+          "ring_precision": 0.2403846153846154,
+          "ring_recall": 0.5952380952380952,
+          "ring_f1": 0.3424657534246575
+        },
+        {
+          "threshold": 0.02409968333427011,
+          "rings_flagged": 101,
+          "ring_tp": 25,
+          "ring_fp": 76,
+          "ring_fn": 17,
+          "ring_precision": 0.24752475247524752,
+          "ring_recall": 0.5952380952380952,
+          "ring_f1": 0.34965034965034963
+        },
+        {
+          "threshold": 0.025035788457866557,
+          "rings_flagged": 97,
+          "ring_tp": 23,
+          "ring_fp": 74,
+          "ring_fn": 19,
+          "ring_precision": 0.23711340206185566,
+          "ring_recall": 0.5476190476190477,
+          "ring_f1": 0.33093525179856115
+        },
+        {
+          "threshold": 0.025675269508801436,
+          "rings_flagged": 94,
+          "ring_tp": 23,
+          "ring_fp": 71,
+          "ring_fn": 19,
+          "ring_precision": 0.24468085106382978,
+          "ring_recall": 0.5476190476190477,
+          "ring_f1": 0.3382352941176471
+        },
+        {
+          "threshold": 0.026450200394766706,
+          "rings_flagged": 90,
+          "ring_tp": 23,
+          "ring_fp": 67,
+          "ring_fn": 19,
+          "ring_precision": 0.25555555555555554,
+          "ring_recall": 0.5476190476190477,
+          "ring_f1": 0.3484848484848485
+        },
+        {
+          "threshold": 0.027591952456529168,
+          "rings_flagged": 87,
+          "ring_tp": 23,
+          "ring_fp": 64,
+          "ring_fn": 19,
+          "ring_precision": 0.26436781609195403,
+          "ring_recall": 0.5476190476190477,
+          "ring_f1": 0.3565891472868217
+        },
+        {
+          "threshold": 0.02927136933068256,
+          "rings_flagged": 84,
+          "ring_tp": 22,
+          "ring_fp": 62,
+          "ring_fn": 20,
+          "ring_precision": 0.2619047619047619,
+          "ring_recall": 0.5238095238095238,
+          "ring_f1": 0.3492063492063492
+        },
+        {
+          "threshold": 0.03157874181750364,
+          "rings_flagged": 80,
+          "ring_tp": 22,
+          "ring_fp": 58,
+          "ring_fn": 20,
+          "ring_precision": 0.275,
+          "ring_recall": 0.5238095238095238,
+          "ring_f1": 0.36065573770491804
+        },
+        {
+          "threshold": 0.03421505810385582,
+          "rings_flagged": 77,
+          "ring_tp": 21,
+          "ring_fp": 56,
+          "ring_fn": 21,
+          "ring_precision": 0.2727272727272727,
+          "ring_recall": 0.5,
+          "ring_f1": 0.3529411764705882
+        },
+        {
+          "threshold": 0.037210928537582226,
+          "rings_flagged": 73,
+          "ring_tp": 21,
+          "ring_fp": 52,
+          "ring_fn": 21,
+          "ring_precision": 0.2876712328767123,
+          "ring_recall": 0.5,
+          "ring_f1": 0.36521739130434777
+        },
+        {
+          "threshold": 0.038344414758191434,
+          "rings_flagged": 70,
+          "ring_tp": 21,
+          "ring_fp": 49,
+          "ring_fn": 21,
+          "ring_precision": 0.3,
+          "ring_recall": 0.5,
+          "ring_f1": 0.37499999999999994
+        },
+        {
+          "threshold": 0.03954952384462673,
+          "rings_flagged": 66,
+          "ring_tp": 21,
+          "ring_fp": 45,
+          "ring_fn": 21,
+          "ring_precision": 0.3181818181818182,
+          "ring_recall": 0.5,
+          "ring_f1": 0.3888888888888889
+        },
+        {
+          "threshold": 0.04127474223084429,
+          "rings_flagged": 63,
+          "ring_tp": 20,
+          "ring_fp": 43,
+          "ring_fn": 22,
+          "ring_precision": 0.31746031746031744,
+          "ring_recall": 0.47619047619047616,
+          "ring_f1": 0.38095238095238093
+        },
+        {
+          "threshold": 0.042775252329254186,
+          "rings_flagged": 60,
+          "ring_tp": 20,
+          "ring_fp": 40,
+          "ring_fn": 22,
+          "ring_precision": 0.3333333333333333,
+          "ring_recall": 0.47619047619047616,
+          "ring_f1": 0.39215686274509803
+        },
+        {
+          "threshold": 0.04322074839804421,
+          "rings_flagged": 56,
+          "ring_tp": 20,
+          "ring_fp": 36,
+          "ring_fn": 22,
+          "ring_precision": 0.35714285714285715,
+          "ring_recall": 0.47619047619047616,
+          "ring_f1": 0.40816326530612246
+        },
+        {
+          "threshold": 0.048420457021341526,
+          "rings_flagged": 53,
+          "ring_tp": 19,
+          "ring_fp": 34,
+          "ring_fn": 23,
+          "ring_precision": 0.3584905660377358,
+          "ring_recall": 0.4523809523809524,
+          "ring_f1": 0.4
+        },
+        {
+          "threshold": 0.05384967344250218,
+          "rings_flagged": 49,
+          "ring_tp": 18,
+          "ring_fp": 31,
+          "ring_fn": 24,
+          "ring_precision": 0.3673469387755102,
+          "ring_recall": 0.42857142857142855,
+          "ring_f1": 0.39560439560439564
+        },
+        {
+          "threshold": 0.05677312208582346,
+          "rings_flagged": 46,
+          "ring_tp": 17,
+          "ring_fp": 29,
+          "ring_fn": 25,
+          "ring_precision": 0.3695652173913043,
+          "ring_recall": 0.40476190476190477,
+          "ring_f1": 0.38636363636363635
+        },
+        {
+          "threshold": 0.06122005137693077,
+          "rings_flagged": 42,
+          "ring_tp": 17,
+          "ring_fp": 25,
+          "ring_fn": 25,
+          "ring_precision": 0.40476190476190477,
+          "ring_recall": 0.40476190476190477,
+          "ring_f1": 0.40476190476190477
+        },
+        {
+          "threshold": 0.07198783652491808,
+          "rings_flagged": 39,
+          "ring_tp": 17,
+          "ring_fp": 22,
+          "ring_fn": 25,
+          "ring_precision": 0.4358974358974359,
+          "ring_recall": 0.40476190476190477,
+          "ring_f1": 0.4197530864197531
+        },
+        {
+          "threshold": 0.08173790279566319,
+          "rings_flagged": 35,
+          "ring_tp": 17,
+          "ring_fp": 18,
+          "ring_fn": 25,
+          "ring_precision": 0.4857142857142857,
+          "ring_recall": 0.40476190476190477,
+          "ring_f1": 0.4415584415584416
+        },
+        {
+          "threshold": 0.09402570115927839,
+          "rings_flagged": 32,
+          "ring_tp": 15,
+          "ring_fp": 17,
+          "ring_fn": 27,
+          "ring_precision": 0.46875,
+          "ring_recall": 0.35714285714285715,
+          "ring_f1": 0.40540540540540543
+        },
+        {
+          "threshold": 0.10213923569126074,
+          "rings_flagged": 29,
+          "ring_tp": 14,
+          "ring_fp": 15,
+          "ring_fn": 28,
+          "ring_precision": 0.4827586206896552,
+          "ring_recall": 0.3333333333333333,
+          "ring_f1": 0.39436619718309857
+        },
+        {
+          "threshold": 0.11226690639401239,
+          "rings_flagged": 25,
+          "ring_tp": 13,
+          "ring_fp": 12,
+          "ring_fn": 29,
+          "ring_precision": 0.52,
+          "ring_recall": 0.30952380952380953,
+          "ring_f1": 0.3880597014925373
+        },
+        {
+          "threshold": 0.14339714643158633,
+          "rings_flagged": 22,
+          "ring_tp": 11,
+          "ring_fp": 11,
+          "ring_fn": 31,
+          "ring_precision": 0.5,
+          "ring_recall": 0.2619047619047619,
+          "ring_f1": 0.34375000000000006
+        },
+        {
+          "threshold": 0.15957070719089522,
+          "rings_flagged": 18,
+          "ring_tp": 9,
+          "ring_fp": 9,
+          "ring_fn": 33,
+          "ring_precision": 0.5,
+          "ring_recall": 0.21428571428571427,
+          "ring_f1": 0.3
+        },
+        {
+          "threshold": 0.1926830409141995,
+          "rings_flagged": 15,
+          "ring_tp": 7,
+          "ring_fp": 8,
+          "ring_fn": 35,
+          "ring_precision": 0.4666666666666667,
+          "ring_recall": 0.16666666666666666,
+          "ring_f1": 0.2456140350877193
+        },
+        {
+          "threshold": 0.24117473594518596,
+          "rings_flagged": 11,
+          "ring_tp": 7,
+          "ring_fp": 4,
+          "ring_fn": 35,
+          "ring_precision": 0.6363636363636364,
+          "ring_recall": 0.16666666666666666,
+          "ring_f1": 0.2641509433962264
+        },
+        {
+          "threshold": 0.3236588319155114,
+          "rings_flagged": 8,
+          "ring_tp": 5,
+          "ring_fp": 3,
+          "ring_fn": 37,
+          "ring_precision": 0.625,
+          "ring_recall": 0.11904761904761904,
+          "ring_f1": 0.19999999999999998
+        },
+        {
+          "threshold": 0.51552398130588,
+          "rings_flagged": 5,
+          "ring_tp": 4,
+          "ring_fp": 1,
+          "ring_fn": 38,
+          "ring_precision": 0.8,
+          "ring_recall": 0.09523809523809523,
+          "ring_f1": 0.1702127659574468
+        },
+        {
+          "threshold": 0.7298272931912063,
+          "rings_flagged": 1,
+          "ring_tp": 1,
+          "ring_fp": 0,
+          "ring_fn": 41,
+          "ring_precision": 1.0,
+          "ring_recall": 0.023809523809523808,
+          "ring_f1": 0.046511627906976744
+        }
+      ]
+    }
+  },
+  "combined": {
+    "ring_alerts_total": 132,
+    "alert_volume_reduction_x": 136.37121212121212,
+    "fraud_txns_covered": 510,
+    "fraud_coverage_pct_of_all_fraud": 0.16542328900421668
+  }
+}
