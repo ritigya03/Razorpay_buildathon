@@ -72,17 +72,19 @@ export function Landing({ report, onEnter }: { report: any; onEnter: () => void 
 
       <div className="inner">
         <header className="hero reveal in">
-          <h1>Stop the fraud ring <span className="g">before the chargeback.</span></h1>
-          <p className="lede">
-            Vulcan sees cross-merchant fraud by centralising raw transaction data. Sentinel reaches
-            the same network-level signal without pooling it — and publishes the precision, recall
-            and false-positive cost that a risk team needs before trusting a model.
-          </p>
-          <div className="cta">
-            <button className="btn-grad" onClick={onEnter}>Open the live dashboard</button>
-            <button className="ghost" onClick={() => document.getElementById("how")?.scrollIntoView()}>
-              How it works
-            </button>
+          <div className="copy">
+            <h1>Stop the fraud ring <span className="g">before the chargeback.</span></h1>
+            <p className="lede">
+              Vulcan sees cross-merchant fraud by centralising raw transaction data. Sentinel reaches
+              the same network-level signal without pooling it — and publishes the precision, recall
+              and false-positive cost that a risk team needs before trusting a model.
+            </p>
+            <div className="cta">
+              <button className="btn-grad" onClick={onEnter}>Open the live dashboard</button>
+              <button className="ghost" onClick={() => document.getElementById("how")?.scrollIntoView()}>
+                How it works
+              </button>
+            </div>
           </div>
           <Diagram />
         </header>
