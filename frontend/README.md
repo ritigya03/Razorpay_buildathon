@@ -1,7 +1,19 @@
-# Frontend (Phase 6) — React dashboard
+# Frontend (Phase 6) — React dashboard + landing
 
-Vite + React + TypeScript. Recharts for the two curves; the ring graph is
-hand-drawn SVG. No CSS framework — one `styles.css` (dark "risk cockpit").
+Vite + React + TypeScript. Recharts for the two curves; the ring graph and the
+landing-page network background are hand-drawn (SVG / canvas). No CSS framework
+or animation library — one `styles.css`.
+
+**Theme:** Razorpay palette — navy `#02042B`, Prussian `#0C2651`, Razorpay blue
+`#0D94FB` / `#3395FF`, cyan `#4DE1F2`, with a blue→cyan gradient for accents.
+Fonts: Space Grotesk (headings) + Inter (body) via Google Fonts.
+
+**Flow:** animated page loader (spinning rings + wordmark + a progress bar that
+waits for `/api/health`, `/api/report`, `/api/stats`) → **landing page**
+(animated node-network canvas, floating gradient orbs, moving grid, count-up
+metric strip, scroll-reveal sections, "Vulcan vs Sentinel" framing) →
+**dashboard**. Routing is hash-based (`#/app`); click the wordmark to go back.
+Respects `prefers-reduced-motion`.
 
 ## Run
 

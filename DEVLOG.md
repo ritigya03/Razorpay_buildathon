@@ -321,6 +321,26 @@ Verified: `npm run build` (tsc + vite) clean; backend + `vite dev` up together;
 vite proxy returns `was_flagged=true`, `lead_time_hours ≈ 114`. Not screenshot-
 verified (no browser tool this session) — user to eyeball at :5173.
 
+### Phase 6b — visual pass (2026-08-30, user request)
+
+Retheme to the Razorpay palette (navy `#02042B`, Prussian `#0C2651`, blue
+`#0D94FB`/`#3395FF`, cyan `#4DE1F2`, blue→cyan gradient), Space Grotesk + Inter
+via Google Fonts. Added:
+- **Page loader** (`components/Loader.tsx`) — three counter-rotating rings +
+  gradient bead + wordmark + a progress bar driven by the boot `Promise.allSettled`
+  of health/report/stats; fades out via CSS.
+- **Landing page** (`components/Landing.tsx`) — animated node-network canvas
+  (`components/NetworkCanvas.tsx`, rAF, ~90 nodes, distance-based edges, honours
+  reduced-motion), floating blurred gradient orbs, panning masked grid, count-up
+  metric strip (`hooks.ts` `useCountUp`), scroll-reveal sections (`useReveal` +
+  IntersectionObserver), "we don't replace Vulcan, we unlock it" comparison.
+  Metric numbers are pulled live from `/api/report` with static fallbacks.
+- Hash routing in `App.tsx` (`#/app`), wordmark click → back to landing.
+- `prefers-reduced-motion` disables all animation + the canvas rAF loop.
+
+Bundle 556 kB (159 kB gzip) — recharts dominates; fine for a local demo.
+`tsc` + `vite build` clean.
+
 ---
 
 ## Phase 4 — Federated-learning side experiment — NOT STARTED
