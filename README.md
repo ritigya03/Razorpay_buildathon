@@ -25,8 +25,8 @@ Running engineering journal (decisions, dead ends, bugs): [`DEVLOG.md`](DEVLOG.m
 |---|---|---|
 | **1** | Temporal split + LightGBM baseline (raw features), held-out metrics + cost curve | ✅ done |
 | **2** | Ring / entity work: feature experiment (negative) + ring engine (triage) | ✅ done |
-| 3 | Razorpay test-mode Payments + Disputes webhooks → live dashboard feed | next |
-| 4 | Federated-learning side experiment (Flower + Opacus DP), utility-vs-ε curve | — |
+| **3** | FastAPI backend: replay feed + Razorpay test-mode Payments/Disputes | ✅ done |
+| 4 | Federated-learning side experiment (Flower + Opacus DP), utility-vs-ε curve | next |
 | 5 | Agent layer (Claude Agent SDK): explain ring, suggest mitigation | — |
 | 6 | React dashboard + recorded demo | — |
 
@@ -48,6 +48,15 @@ Running engineering journal (decisions, dead ends, bugs): [`DEVLOG.md`](DEVLOG.m
   rings. Held-out **device rings: precision 0.75, recall 0.75**. Collapses
   18,001 transaction alerts into **132 ring alerts (~136× fewer)**; covers 16.5%
   of all fraud (the coordinated slice — ceiling stated openly).
+
+### Phase 3 — backend ([backend/README.md](backend/README.md))
+
+FastAPI service. A **replay feed** streams the held-out split through the real
+model + ring engine at compressed time; **Razorpay test-mode** supplies real
+orders and payment/dispute webhooks alongside it. `POST /api/simulate/dispute`
+closes the money loop — it disputes a flagged fraudulent transaction and reports
+how many hours earlier Sentinel flagged it (~40h in a typical run).
+`make backend` runs it; `make test` runs the end-to-end pipeline test.
 
 ---
 

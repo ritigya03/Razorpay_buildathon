@@ -5,7 +5,7 @@ DATA_DIR ?= /Users/ritigya/Downloads/ieee-fraud-detection
 PY := .venv/bin/python
 PIP := .venv/bin/pip
 
-.PHONY: venv splits baseline ring-features ring-engine reproduce clean
+.PHONY: venv splits baseline ring-features ring-engine reproduce backend test clean
 
 venv:
 	python3 -m venv .venv
@@ -33,6 +33,13 @@ ring-engine:
 reproduce: splits baseline ring-engine
 	@echo ""
 	@echo "Done -> report/metrics.json, report/ring_metrics.json"
+
+# Phase 3 — run the backend (needs `make baseline` first for the model + spec)
+backend:
+	.venv/bin/uvicorn backend.app.main:app --reload --port 8000
+
+test:
+	.venv/bin/python -m pytest backend/tests/ -q
 
 clean:
 	rm -rf data/splits report/metrics.json report/metrics_ring.json report/ring_metrics.json report/figures

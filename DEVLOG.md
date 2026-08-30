@@ -238,9 +238,63 @@ both measured on unseen data.
 
 ---
 
-## Phase 3 — Razorpay backend + live dashboard feed — NOT STARTED
+## Phase 3 — FastAPI backend (2026-08-30)
 
-Planned: FastAPI service, test-mode Payments API (real orders/payments from the
-React checkout), Disputes webhooks (`payment.dispute.created/won/lost/closed`)
-→ re-score the disputed payment, attach it to its ring, surface "flagged N days
-before the dispute". Disputes act as ground-truth labels in the dashboard.
+**Design constraint discovered:** a Razorpay payment webhook carries ~8 fields
+(amount, email, card network, method, contact, created_at). The trained model
+needs ~430 IEEE-CIS features. So the "live feed" can't just be real payments.
+
+**Resolution (told the user, proceeded):**
+- **Replay feed** — `data/splits/test.parquet` streamed in `TransactionDT`
+  order at N days/real-second. Each row scored by the real LightGBM model +
+  grouped by the real ring engine. Ground truth is known, so dispute simulation
+  and lead-time claims are truth-backed. This is the dashboard's main data.
+- **Razorpay test-mode** — real orders + payment/dispute webhooks flow in
+  alongside. Live payments get a transparent **rules** score (`app/rules.py`,
+  built from the data study's email-domain fraud rates), labelled
+  `scorer="rules"` vs the replay's `scorer="model"`.
+- **Money loop** — `POST /api/simulate/dispute` raises a dispute against a
+  flagged fraudulent replay txn in a flagged ring; response reports the
+  lead time (hours we flagged it before the "chargeback").
+
+**Refactor:** `train/common.py` now exposes `build_feature_spec` /
+`save_spec` / `load_spec` / `transform`, and training writes
+`models/baseline_lgb_feature_spec.json`, so the backend applies the exact
+training-time feature transform. `_add_time_features` → public
+`add_time_features`. Re-ran `make baseline` (best_iter 1144, PR-AUC test 0.546,
+ROC-AUC 0.903 — same as before within noise; the longer run is from
+`first_metric_only=True` added in Phase 2).
+
+**Components:** `app/{config,models,db,scoring,rings,replay,rules,razorpay_client,events,main}.py`.
+SQLite event store: `Transaction`, `Ring`, `Dispute`, `Alert`. Runtime ring
+engine (`app/rings.py`) reuses the Phase-2b device/address-ring definition
+(no union-find); default flag threshold read from
+`report/ring_metrics.json` (~0.082).
+
+**Bugs fixed during the smoke test:**
+- `sqlmodel` has no `func` — import from `sqlalchemy`.
+- Sync endpoint calling `asyncio.create_task` fails (no running loop in the
+  threadpool) — made `/api/replay/{action}` `async`.
+- **Replay virtual clock ran away** — it was free-running on wall-time ×
+  days_per_sec while ingestion was capped at `MAX_PER_TICK` rows/tick. The
+  clock reached "day 842" while only 30k of 88k rows were in; the ring window
+  query `ts >= virtual_now − 7d` then matched nothing → zero rings. Fix: the
+  clock now tracks the **data frontier** — `virtual_now = TransactionDT of the
+  last ingested row` — so windows always align with real data.
+- `session.exec(delete(Ring))` unreliable via SQLModel — switched to
+  iterate-and-delete (few hundred rows/rebuild).
+
+**Smoke result (`make test`, 2 tests pass in ~8s):** replay ingests, model
+scores (live precision ≈ 0.15, matches the cost-optimal operating point),
+device rings form (e.g. `SM-J105B … chrome 65.0 for android`, 3 accounts /
+3 cards / mean risk 0.99 / all fraud), `simulate/dispute` returns
+`was_flagged=True`, `lead_time_hours ≈ 40`, linked to a flagged ring.
+
+---
+
+## Phase 4 — Federated-learning side experiment — NOT STARTED
+
+Planned: partition train into 8–10 "merchants", run Flower + Opacus DP-SGD,
+produce (a) federated vs centralized accuracy, (b) accuracy-vs-ε curve.
+Secondary — does not touch the graded numbers. May need a separate Python 3.12
+venv if PyTorch has no 3.14 wheel.

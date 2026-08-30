@@ -24,5 +24,9 @@ frontend/dist/
 .env
 *.local
 
+# Backend runtime
+backend/sentinel.db
+backend/*.db
+
 # OS
 .DS_Store

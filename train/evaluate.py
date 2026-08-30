@@ -193,5 +193,7 @@ def train_and_report(data: dict, *, model_name: str, phase: int,
     report_path.write_text(json.dumps(report, indent=2))
     MODEL_DIR.mkdir(exist_ok=True)
     clf.booster_.save_model(str(MODEL_DIR / f"{model_stub}.txt"), num_iteration=best_iter)
+    if "spec" in data:
+        (MODEL_DIR / f"{model_stub}_feature_spec.json").write_text(json.dumps(data["spec"]))
     print(f"Wrote {report_path}  and  models/{model_stub}.txt")
     return report
