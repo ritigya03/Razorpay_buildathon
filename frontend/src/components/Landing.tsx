@@ -72,7 +72,6 @@ export function Landing({ report, onEnter }: { report: any; onEnter: () => void 
 
       <div className="inner">
         <header className="hero reveal in">
-          <span className="chip"><span className="d" /> Razorpay AI Buildathon · Track 02 — AI Risk Manager</span>
           <h1>Stop the fraud ring <span className="g">before the chargeback.</span></h1>
           <p className="lede">
             Vulcan sees cross-merchant fraud by centralising raw transaction data. Sentinel reaches

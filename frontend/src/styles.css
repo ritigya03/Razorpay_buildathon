@@ -47,9 +47,10 @@ a { color: var(--blue); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 button {
-  background: #fff; color: var(--ink);
-  border: 1px solid var(--border-2); border-radius: 8px;
+  background: rgba(255, 255, 255, .7); color: var(--ink);
+  border: 1px solid rgba(51, 149, 255, .28); border-radius: 8px;
   padding: 7px 13px; cursor: pointer; font: inherit; font-size: 13px;
+  backdrop-filter: blur(6px);
   transition: border-color .15s, background .15s;
 }
 button:hover { border-color: var(--blue); }
@@ -62,10 +63,17 @@ input[type="number"], input[type="text"] {
   border: 1px solid var(--border-2); border-radius: 8px; padding: 7px 10px; font: inherit;
 }
 
-/* ---------- dashboard shell ---------- */
-.app { max-width: 1220px; margin: 0 auto; padding: 22px; }
+/* ---------- dashboard shell (translucent blue) ---------- */
+.app { max-width: 1220px; margin: 0 auto; padding: 22px; position: relative; }
+.app::before {
+  content: ""; position: fixed; inset: 0; z-index: -1;
+  background:
+    radial-gradient(900px 520px at 12% -12%, rgba(51, 149, 255, .20), transparent 60%),
+    radial-gradient(820px 480px at 100% -4%, rgba(13, 148, 251, .14), transparent 55%),
+    linear-gradient(180deg, #e9f1ff 0%, #f3f8ff 55%, #eef4ff 100%);
+}
 .topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
-  border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+  border-bottom: 1px solid rgba(51, 149, 255, .18); padding-bottom: 16px; }
 .brand { font-weight: 600; font-size: 16px; color: var(--navy); display: flex; align-items: center; gap: 8px; }
 .brand .mark {
   width: 22px; height: 22px; border-radius: 6px; background: var(--blue);
@@ -78,7 +86,7 @@ input[type="number"], input[type="text"] {
 .tag.live { color: var(--ok); border-color: #b7e2cc; background: #f0faf4; }
 .tag.off { color: var(--danger); border-color: #f0c6cf; background: #fdf1f3; }
 
-.tabs { display: flex; gap: 2px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+.tabs { display: flex; gap: 2px; margin-bottom: 20px; border-bottom: 1px solid rgba(51, 149, 255, .18); }
 .tabs button {
   border: none; background: none; color: var(--muted);
   padding: 9px 15px; border-radius: 0; border-bottom: 2px solid transparent; margin-bottom: -1px;
@@ -94,10 +102,12 @@ input[type="number"], input[type="text"] {
 @media (max-width: 620px) { .cols-4, .cols-3, .cols-2 { grid-template-columns: 1fr; } }
 
 .panel {
-  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 16px; box-shadow: var(--shadow);
+  background: rgba(255, 255, 255, .55);
+  border: 1px solid rgba(51, 149, 255, .18); border-radius: var(--radius);
+  padding: 16px; box-shadow: 0 1px 2px rgba(12, 38, 81, .04), 0 8px 30px rgba(51, 149, 255, .08);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
 }
-.panel.hover:hover { border-color: var(--border-2); }
+.panel.hover:hover { border-color: rgba(51, 149, 255, .4); }
 
 .stat .v { font-size: 25px; font-weight: 600; color: var(--navy); }
 .stat .l { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-top: 3px; }
@@ -107,11 +117,12 @@ input[type="number"], input[type="text"] {
 .bar > div { height: 100%; background: var(--blue); border-radius: 4px; transition: width .5s ease; }
 
 table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-th { color: var(--muted); font-weight: 500; position: sticky; top: 0; background: #fff; }
-tbody tr:hover { background: var(--surface); }
+th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid rgba(51, 149, 255, .14); white-space: nowrap; }
+th { color: var(--muted); font-weight: 500; position: sticky; top: 0;
+  background: rgba(233, 241, 255, .92); backdrop-filter: blur(6px); }
+tbody tr:hover { background: rgba(51, 149, 255, .07); }
 tr.fraud td:first-child { box-shadow: inset 3px 0 0 var(--fraud); }
-tr.flagged { background: #fff8ec; }
+tr.flagged { background: rgba(255, 176, 58, .12); }
 .scroll { max-height: 470px; overflow: auto; }
 
 .pill { font-size: 11px; padding: 1px 7px; border-radius: 5px; border: 1px solid var(--border-2); color: var(--muted); }
