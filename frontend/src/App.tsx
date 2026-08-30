@@ -64,7 +64,7 @@ export default function App() {
         <div className="app">
           <div className="topbar">
             <span className="brand" style={{ cursor: "pointer" }} onClick={home}>
-              <span className="dot" /> Project <b>Sentinel</b>
+              <span className="mark">S</span> Project Sentinel
             </span>
             <span className="tag">AI Risk Manager · coordinated-fraud rings</span>
             <span className={"tag " + (health?.model_loaded ? "live" : "off")}>

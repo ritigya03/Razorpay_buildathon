@@ -5,7 +5,9 @@ import {
 } from "recharts";
 import { api } from "../api";
 
-const axis = { stroke: "#8a93a5", fontSize: 11 };
+const axis = { stroke: "#67728a", fontSize: 11 };
+const GRID = "#e2e8f2";
+const TIP = { background: "#fff", border: "1px solid #e2e8f2", borderRadius: 8, color: "#24324c" };
 
 export function Metrics() {
   const [rep, setRep] = useState<any>(null);
@@ -37,13 +39,13 @@ export function Metrics() {
           <h2>Precision — recall (test)</h2>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={curve} margin={{ top: 8, right: 12, bottom: 4, left: 0 }}>
-              <CartesianGrid stroke="#262d3d" />
+              <CartesianGrid stroke={GRID} />
               <XAxis dataKey="recall" type="number" domain={[0, 1]} tick={axis}
                      tickFormatter={(v) => v.toFixed(1)} label={{ value: "recall", position: "insideBottom", offset: -2, fill: "#8a93a5", fontSize: 11 }} />
               <YAxis dataKey="precision" domain={[0, 1]} tick={axis} tickFormatter={(v) => v.toFixed(1)} />
-              <Tooltip contentStyle={{ background: "#131824", border: "1px solid #262d3d" }} />
-              <Line dataKey="precision" stroke="#5b8def" dot={false} strokeWidth={2} isAnimationActive={false} />
-              <ReferenceDot x={op.recall} y={op.precision} r={5} fill="#d29922" stroke="none" />
+              <Tooltip contentStyle={TIP} />
+              <Line dataKey="precision" stroke="#0b74d1" dot={false} strokeWidth={2} isAnimationActive={false} />
+              <ReferenceDot x={op.recall} y={op.precision} r={5} fill="#b0710a" stroke="none" />
             </LineChart>
           </ResponsiveContainer>
           <div className="muted" style={{ fontSize: 12 }}>amber dot = cost-optimal operating point</div>
@@ -53,13 +55,13 @@ export function Metrics() {
           <h2>Expected loss vs recall (test)</h2>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={curve} margin={{ top: 8, right: 12, bottom: 4, left: 8 }}>
-              <CartesianGrid stroke="#262d3d" />
+              <CartesianGrid stroke={GRID} />
               <XAxis dataKey="recall" type="number" domain={[0, 1]} tick={axis} tickFormatter={(v) => v.toFixed(1)} />
               <YAxis tick={axis} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ background: "#131824", border: "1px solid #262d3d" }}
+              <Tooltip contentStyle={TIP}
                        formatter={(v: any) => Number(v).toLocaleString()} />
-              <Line dataKey="cost" stroke="#f85149" dot={false} strokeWidth={2} isAnimationActive={false} />
-              <ReferenceDot x={op.recall} y={op.total_expected_cost} r={5} fill="#d29922" stroke="none" />
+              <Line dataKey="cost" stroke="#d23c58" dot={false} strokeWidth={2} isAnimationActive={false} />
+              <ReferenceDot x={op.recall} y={op.total_expected_cost} r={5} fill="#b0710a" stroke="none" />
             </LineChart>
           </ResponsiveContainer>
           <div className="muted" style={{ fontSize: 12 }}>
