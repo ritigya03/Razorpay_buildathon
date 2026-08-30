@@ -10,6 +10,7 @@ reports its accuracy honestly: **precision / recall on a held-out temporal test
 set, with the false-positive cost quantified.**
 
 Concept & positioning: [`project_sentinel.md`](project_sentinel.md).
+Running engineering journal (decisions, dead ends, bugs): [`DEVLOG.md`](DEVLOG.md).
 
 > **Defense-only.** Sentinel is advisory. It emits a 0–100 risk score; flagged
 > transactions are routed to a human reviewer. Nothing is auto-blocked, and the
