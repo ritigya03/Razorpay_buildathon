@@ -292,6 +292,37 @@ device rings form (e.g. `SM-J105B … chrome 65.0 for android`, 3 accounts /
 
 ---
 
+## Phase 6 — React dashboard (2026-08-30, done before Phase 4 at user's request)
+
+Vite + React + TypeScript, Recharts for the two curves, hand-drawn SVG for the
+ring graph, one `styles.css` (dark). Dev server proxies `/api` + `/webhook` to
+:8000. Six tabs: Overview, Feed, Rings, Disputes, Metrics, Razorpay. All poll
+every 2–3 s.
+
+Backend additions: `GET /api/report` (serves `metrics.json` + `ring_metrics.json`
+for the Metrics tab); `/api/health` now returns the public `razorpay_key_id` for
+Checkout.js; `/api/alerts?kind=`.
+
+**Bugs fixed during wiring:**
+- `pandas 4` deprecation: `pd.Categorical(values, categories=…)` with
+  out-of-category values. `common.transform` now nulls unseen values with
+  `.where(isin(cats))` before constructing the Categorical.
+- **Stale replay on restart** — `uvicorn --reload` (or any restart) spawned a
+  fresh process with `replay.cursor = 0` while the SQLite DB still held the
+  previous run's rows; `_ingest_due` then hit primary-key conflicts and the loop
+  stalled at `ingested = 0` even though the DB looked full. Fix: lifespan now
+  does `replay.load(); replay.reset(); replay.start()` (each service start = a
+  clean replay), and `_ingest_due` skips ids already present as a guard.
+- Left a stray uvicorn holding :8000 from an earlier manual run — killed via
+  `lsof -ti :8000`.
+
+Verified: `npm run build` (tsc + vite) clean; backend + `vite dev` up together;
+`/api/report` shape matches the Metrics component; simulated dispute through the
+vite proxy returns `was_flagged=true`, `lead_time_hours ≈ 114`. Not screenshot-
+verified (no browser tool this session) — user to eyeball at :5173.
+
+---
+
 ## Phase 4 — Federated-learning side experiment — NOT STARTED
 
 Planned: partition train into 8–10 "merchants", run Flower + Opacus DP-SGD,

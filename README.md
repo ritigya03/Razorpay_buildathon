@@ -26,9 +26,9 @@ Running engineering journal (decisions, dead ends, bugs): [`DEVLOG.md`](DEVLOG.m
 | **1** | Temporal split + LightGBM baseline (raw features), held-out metrics + cost curve | ✅ done |
 | **2** | Ring / entity work: feature experiment (negative) + ring engine (triage) | ✅ done |
 | **3** | FastAPI backend: replay feed + Razorpay test-mode Payments/Disputes | ✅ done |
+| **6** | React dashboard (Vite + Recharts + SVG ring graph) | ✅ done |
 | 4 | Federated-learning side experiment (Flower + Opacus DP), utility-vs-ε curve | next |
 | 5 | Agent layer (Claude Agent SDK): explain ring, suggest mitigation | — |
-| 6 | React dashboard + recorded demo | — |
 
 ### Phase 1 — transaction scorer (held-out test = final 15% of the timeline, by date)
 
@@ -57,6 +57,13 @@ orders and payment/dispute webhooks alongside it. `POST /api/simulate/dispute`
 closes the money loop — it disputes a flagged fraudulent transaction and reports
 how many hours earlier Sentinel flagged it (~40h in a typical run).
 `make backend` runs it; `make test` runs the end-to-end pipeline test.
+
+### Phase 6 — dashboard ([frontend/README.md](frontend/README.md))
+
+React + Vite. Six tabs: Overview (replay + live metrics), Feed (transaction
+stream), Rings (flagged rings + SVG member graph), Disputes (chargeback loop +
+lead time), Metrics (held-out PR / cost curves), Razorpay (real test-mode
+checkout). `cd frontend && npm install && npm run dev` → http://localhost:5173.
 
 ---
 

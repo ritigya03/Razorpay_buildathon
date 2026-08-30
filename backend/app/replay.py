@@ -119,7 +119,13 @@ class ReplayEngine:
             return
         batch = rows.iloc[cur:end]
         with Session(engine) as s:
+            ids = [str(int(x)) for x in batch["TransactionID"]]
+            existing = set(
+                s.exec(select(Transaction.id).where(Transaction.id.in_(ids))).all()
+            )
             for _, r in batch.iterrows():
+                if str(int(r["TransactionID"])) in existing:
+                    continue
                 score = float(r["_score"])
                 flagged = score >= self.per_txn_threshold
                 s.add(Transaction(

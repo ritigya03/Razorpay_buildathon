@@ -28,6 +28,8 @@ from .scoring import scorer
 async def lifespan(app: FastAPI):
     init_db()
     if settings.replay_autostart and scorer.ok:
+        replay.load()
+        replay.reset()   # each service start = a clean replay from day 0
         replay.start()
     yield
     replay.pause()
@@ -44,7 +46,11 @@ app.add_middleware(
 # --------------------------------------------------------------------------- #
 @app.get("/api/health")
 def health() -> dict:
-    return {"ok": True, "model_loaded": scorer.ok, "razorpay_ready": settings.razorpay_ready}
+    return {
+        "ok": True, "model_loaded": scorer.ok,
+        "razorpay_ready": settings.razorpay_ready,
+        "razorpay_key_id": settings.razorpay_key_id or None,  # public key, safe to expose
+    }
 
 
 @app.get("/api/stats")
@@ -125,6 +131,17 @@ def get_ring(ring_id: int, s: Session = Depends(get_session)) -> dict:
 @app.get("/api/disputes")
 def list_disputes(s: Session = Depends(get_session)) -> list[Dispute]:
     return s.exec(select(Dispute).order_by(Dispute.created_at.desc())).all()
+
+
+@app.get("/api/report")
+def report() -> dict:
+    out: dict = {}
+    if settings.metrics_file.exists():
+        out["metrics"] = json.loads(settings.metrics_file.read_text())
+    rm = settings.metrics_file.parent / "ring_metrics.json"
+    if rm.exists():
+        out["ring_metrics"] = json.loads(rm.read_text())
+    return out
 
 
 @app.get("/api/alerts")
