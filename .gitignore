@@ -1,5 +1,7 @@
 # Python
 .venv/
+.venv-fl/
+scratch/
 __pycache__/
 *.pyc
 *.pkl

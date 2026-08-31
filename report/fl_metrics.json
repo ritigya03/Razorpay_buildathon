@@ -1,0 +1,299 @@
+{
+  "meta": {
+    "generated_at": "2026-08-31T19:17:43.431474+00:00",
+    "phase": 4,
+    "model": "MLP 460->128->32->1, tanh, dropout 0.25, focal loss (gamma=2, alpha=0.75). tanh + small net + large DP batch follow DP-SGD utility guidance (DPMLBench, TAN). Features: standardized IEEE-CIS numerics + frequency-encoded categoricals + 27 leakage-safe engineered features (OOF reputation / causal velocity / 7d ring structure, from train/ring_features.py).",
+    "model_selection": "FedSWA \u2014 mean of the last 3 rounds' global weights, or the best single validation round, whichever scores higher on validation (never on test).",
+    "framework": "Flower 1.35 \u2014 FedAvg strategy + flwr.common types; in-process round loop (no Ray/run_simulation: no Python 3.14 wheel, and the two-phase commit/reveal does not map to one round-trip per round)",
+    "n_merchants": 8,
+    "fl_rounds": 5,
+    "local_steps_per_round": 15,
+    "batch_size": 4096,
+    "dp_batch_size": 4096,
+    "lr": 0.001,
+    "partition": "non-IID \u2014 hash(card1) % 8; per-merchant rows + fraud rate below",
+    "seed": 42,
+    "python": "3.14.7",
+    "test_split": "data/splits/test.parquet (held out, untouched since Phase 1)",
+    "dp": {
+      "mechanism": "Opacus DP-SGD per client, Poisson sampling, RDP accountant",
+      "max_grad_norm": 1.0,
+      "delta": 1e-05,
+      "accounting_note": "noise multiplier fixed per merchant to hit target epsilon after all rounds; one persistent PrivacyEngine per client so the accountant accumulates. spent_epsilon is the cumulative per-client budget after the final round."
+    },
+    "robustness": {
+      "commit_reveal": "SHA-256 digest committed before weights revealed; digest mismatch on reveal -> update rejected (last-mover defense)",
+      "norm_filter": "delta L2 norm > 3x median norm -> rejected (scaled-negation attacks)",
+      "cosine_filter": "delta cosine distance from the median that is both a >3-MAD outlier and past an 0.85 floor -> rejected (direction-reversal attacks). project_sentinel.md's fixed 0.3 threshold rejected every honest client on this non-IID split; see PHASE4.md.",
+      "aggregation": "balance-weighted by fraud (minority-class) row count",
+      "merkle_root": "binary SHA-256 tree over each round's commitments, logged"
+    },
+    "disclaimer": "SECONDARY experiment. Does NOT affect the graded LightGBM baseline (report/metrics.json) or ring engine (report/ring_metrics.json). The MLP is weaker than LightGBM on this data by construction \u2014 the comparisons here are federated-vs-centralized and DP-vs-no-DP within the same MLP."
+  },
+  "centralized": {
+    "pr_auc": 0.39512580586875395,
+    "roc_auc": 0.8569712233833278,
+    "val_pr_auc": 0.45739535505171547,
+    "epochs_run": 6
+  },
+  "federated_no_dp": {
+    "pr_auc": 0.38395973524947424,
+    "roc_auc": 0.8430821973919576,
+    "rounds": 5,
+    "val_pr_auc": 0.3976,
+    "selection": "best-val round 5",
+    "best_round": 5,
+    "best_round_test_pr_auc": 0.384,
+    "swa_test_pr_auc": 0.3816,
+    "per_merchant": [
+      {
+        "merchant": 0,
+        "rows": 41536,
+        "fraud_rows": 1613,
+        "fraud_rate": 0.03883378207683563
+      },
+      {
+        "merchant": 1,
+        "rows": 65205,
+        "fraud_rows": 2017,
+        "fraud_rate": 0.030933210626244545
+      },
+      {
+        "merchant": 2,
+        "rows": 54656,
+        "fraud_rows": 1318,
+        "fraud_rate": 0.024114461615681648
+      },
+      {
+        "merchant": 3,
+        "rows": 39949,
+        "fraud_rows": 1727,
+        "fraud_rate": 0.043230120092630386
+      },
+      {
+        "merchant": 4,
+        "rows": 65866,
+        "fraud_rows": 2376,
+        "fraud_rate": 0.036073241382837296
+      },
+      {
+        "merchant": 5,
+        "rows": 39257,
+        "fraud_rows": 1497,
+        "fraud_rate": 0.038133326917886734
+      },
+      {
+        "merchant": 6,
+        "rows": 55739,
+        "fraud_rows": 2299,
+        "fraud_rate": 0.04124580696225166
+      },
+      {
+        "merchant": 7,
+        "rows": 51170,
+        "fraud_rows": 1691,
+        "fraud_rate": 0.03304670751094818
+      }
+    ],
+    "honest_rejections": [],
+    "merkle_root_round1": "81510a32f2d46c3777d19ec3425860d3c0d49abe0b799f247462e47acff4169b"
+  },
+  "dp_sweep": [
+    {
+      "target_epsilon": 8.0,
+      "spent_epsilon_max": 7.959,
+      "spent_epsilon_mean": 7.202,
+      "noise_multiplier_range": [
+        0.95,
+        0.764
+      ],
+      "pr_auc": 0.3967757743654485,
+      "roc_auc": 0.8271743758251773,
+      "val_pr_auc": 0.3903,
+      "selection": "best-val round 5",
+      "delta_pr_auc_vs_centralized": 0.0016
+    },
+    {
+      "target_epsilon": 4.0,
+      "spent_epsilon_max": 3.977,
+      "spent_epsilon_mean": 3.563,
+      "noise_multiplier_range": [
+        1.401,
+        1.052
+      ],
+      "pr_auc": 0.39498605531886294,
+      "roc_auc": 0.827126033764197,
+      "val_pr_auc": 0.3884,
+      "selection": "best-val round 5",
+      "delta_pr_auc_vs_centralized": -0.0001
+    },
+    {
+      "target_epsilon": 2.0,
+      "spent_epsilon_max": 1.986,
+      "spent_epsilon_mean": 1.762,
+      "noise_multiplier_range": [
+        2.256,
+        1.538
+      ],
+      "pr_auc": 0.39023661688099714,
+      "roc_auc": 0.8268388381039798,
+      "val_pr_auc": 0.3834,
+      "selection": "best-val round 5",
+      "delta_pr_auc_vs_centralized": -0.0049
+    },
+    {
+      "target_epsilon": 1.0,
+      "spent_epsilon_max": 0.992,
+      "spent_epsilon_mean": 0.874,
+      "noise_multiplier_range": [
+        3.945,
+        2.5
+      ],
+      "pr_auc": 0.3746797307550514,
+      "roc_auc": 0.8258827389323009,
+      "val_pr_auc": 0.3684,
+      "selection": "best-val round 5",
+      "delta_pr_auc_vs_centralized": -0.0204
+    }
+  ],
+  "robustness_demo": {
+    "malicious_merchants": [
+      0
+    ],
+    "no_defense_plain_fedavg": {
+      "attack": "sign_flip (global - 10x honest delta), 1/8 merchants",
+      "pr_auc": 0.03974474817901423,
+      "roc_auc": 0.5004647742507887,
+      "rejected_updates": 0,
+      "rejection_reasons": [],
+      "rejections": [],
+      "delta_vs_honest_federated": -0.3442
+    },
+    "defended": {
+      "sign_flip": {
+        "attack": "reversed direction, 10x magnitude",
+        "expected_catch": "norm_outlier",
+        "pr_auc": 0.388446089170229,
+        "roc_auc": 0.8440700427960307,
+        "rejected_updates": 5,
+        "rejection_reasons": [
+          "norm_outlier"
+        ],
+        "rejections": [
+          {
+            "round": 1,
+            "merchant": 0,
+            "reason": "norm_outlier",
+            "norm_ratio": 8.597
+          },
+          {
+            "round": 2,
+            "merchant": 0,
+            "reason": "norm_outlier",
+            "norm_ratio": 8.897
+          },
+          {
+            "round": 3,
+            "merchant": 0,
+            "reason": "norm_outlier",
+            "norm_ratio": 8.991
+          },
+          {
+            "round": 4,
+            "merchant": 0,
+            "reason": "norm_outlier",
+            "norm_ratio": 9.586
+          },
+          {
+            "round": 5,
+            "merchant": 0,
+            "reason": "norm_outlier",
+            "norm_ratio": 8.851
+          }
+        ],
+        "delta_vs_honest_federated": 0.0045
+      },
+      "flip": {
+        "attack": "reversed direction, honest magnitude",
+        "expected_catch": "cosine_outlier",
+        "pr_auc": 0.388446089170229,
+        "roc_auc": 0.8440700427960307,
+        "rejected_updates": 5,
+        "rejection_reasons": [
+          "cosine_outlier"
+        ],
+        "rejections": [
+          {
+            "round": 1,
+            "merchant": 0,
+            "reason": "cosine_outlier",
+            "cos_distance": 1.8462
+          },
+          {
+            "round": 2,
+            "merchant": 0,
+            "reason": "cosine_outlier",
+            "cos_distance": 1.6742
+          },
+          {
+            "round": 3,
+            "merchant": 0,
+            "reason": "cosine_outlier",
+            "cos_distance": 1.1392
+          },
+          {
+            "round": 4,
+            "merchant": 0,
+            "reason": "cosine_outlier",
+            "cos_distance": 0.9729
+          },
+          {
+            "round": 5,
+            "merchant": 0,
+            "reason": "cosine_outlier",
+            "cos_distance": 0.9099
+          }
+        ],
+        "delta_vs_honest_federated": 0.0045
+      },
+      "last_mover": {
+        "attack": "honest commit, poisoned reveal",
+        "expected_catch": "commitment_mismatch",
+        "pr_auc": 0.388446089170229,
+        "roc_auc": 0.8440700427960307,
+        "rejected_updates": 5,
+        "rejection_reasons": [
+          "commitment_mismatch"
+        ],
+        "rejections": [
+          {
+            "round": 1,
+            "merchant": 0,
+            "reason": "commitment_mismatch"
+          },
+          {
+            "round": 2,
+            "merchant": 0,
+            "reason": "commitment_mismatch"
+          },
+          {
+            "round": 3,
+            "merchant": 0,
+            "reason": "commitment_mismatch"
+          },
+          {
+            "round": 4,
+            "merchant": 0,
+            "reason": "commitment_mismatch"
+          },
+          {
+            "round": 5,
+            "merchant": 0,
+            "reason": "commitment_mismatch"
+          }
+        ],
+        "delta_vs_honest_federated": 0.0045
+      }
+    }
+  }
+}

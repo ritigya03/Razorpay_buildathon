@@ -7,9 +7,10 @@ import { Feed } from "./components/Feed";
 import { Rings } from "./components/Rings";
 import { Disputes } from "./components/Disputes";
 import { Metrics } from "./components/Metrics";
+import { Federated } from "./components/Federated";
 import { RazorpayPanel } from "./components/Razorpay";
 
-const TABS = ["Overview", "Feed", "Rings", "Disputes", "Metrics", "Razorpay"] as const;
+const TABS = ["Overview", "Feed", "Rings", "Disputes", "Metrics", "Federated", "Razorpay"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function App() {
@@ -86,6 +87,7 @@ export default function App() {
           {tab === "Rings" && <Rings />}
           {tab === "Disputes" && <Disputes stats={stats} />}
           {tab === "Metrics" && <Metrics />}
+          {tab === "Federated" && <Federated />}
           {tab === "Razorpay" && <RazorpayPanel keyId={health?.razorpay_key_id ?? null} />}
         </div>
       )}

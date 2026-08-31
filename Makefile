@@ -4,8 +4,10 @@
 DATA_DIR ?= /Users/ritigya/Downloads/ieee-fraud-detection
 PY := .venv/bin/python
 PIP := .venv/bin/pip
+PY_FL := .venv-fl/bin/python
+PIP_FL := .venv-fl/bin/pip
 
-.PHONY: venv splits baseline ring-features ring-engine reproduce backend test clean
+.PHONY: venv splits baseline ring-features ring-engine reproduce backend test clean fl-deps fl
 
 venv:
 	python3 -m venv .venv
@@ -34,6 +36,21 @@ reproduce: splits baseline ring-engine
 	@echo ""
 	@echo "Done -> report/metrics.json, report/ring_metrics.json"
 
+# Phase 4 — federated learning + DP side experiment. SECONDARY: not part of
+# `reproduce`, does not touch report/metrics.json or report/ring_metrics.json.
+# Lives in its own venv (.venv-fl) — flwr 1.35 pins fastapi/uvicorn versions that
+# conflict with the Phase 3 backend. See requirements-fl.txt.
+fl-deps:
+	python3 -m venv .venv-fl
+	$(PIP_FL) install -U pip
+	$(PIP_FL) install -r requirements-fl.txt
+
+# federated vs centralized, an accuracy-vs-ε curve, and a poisoned-merchant
+# before/after -> report/fl_metrics.json + report/figures/fl_epsilon_curve.png
+# (~4-5 min; run `.venv-fl/bin/python train/fl_experiment.py --quick` for a ~90s smoke)
+fl:
+	$(PY_FL) -u train/fl_experiment.py
+
 # Phase 3 — run the backend (needs `make baseline` first for the model + spec)
 backend:
 	.venv/bin/uvicorn backend.app.main:app --reload --port 8000
@@ -42,4 +59,4 @@ test:
 	.venv/bin/python -m pytest backend/tests/ -q
 
 clean:
-	rm -rf data/splits report/metrics.json report/metrics_ring.json report/ring_metrics.json report/figures
+	rm -rf data/splits report/metrics.json report/metrics_ring.json report/ring_metrics.json report/figures report/fl_metrics.json

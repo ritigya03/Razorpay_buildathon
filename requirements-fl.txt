@@ -1,0 +1,28 @@
+# Phase 4 — federated learning + differential privacy side experiment.
+#
+# Installed into a SEPARATE virtualenv (.venv-fl), NOT the core .venv:
+# flwr 1.35 pins fastapi<0.139 / uvicorn<0.50, which conflict with the
+# backend's fastapi 0.141 (see requirements.txt). Phase 4 is self-contained —
+# its scripts only read data/splits/*.parquet and write report/fl_metrics.json —
+# so isolating it keeps the Phase 3 backend untouched.
+#
+#   make fl-deps      # builds .venv-fl from this file
+#   make fl           # runs the experiment -> report/fl_metrics.json
+#
+# NOT part of the core install or `make reproduce`. Does not affect the graded
+# LightGBM baseline (report/metrics.json) or ring engine (report/ring_metrics.json).
+#
+# Verified to resolve on Python 3.14.7 (macOS arm64).
+
+# data + eval (pinned to match the core modelling stack)
+pandas==3.0.5
+numpy==2.5.2
+pyarrow==25.0.1
+scikit-learn==1.9.0
+scipy==1.18.1
+
+# federated learning + differential privacy
+torch==2.13.0
+opacus==1.6.0
+flwr==1.35.0
+matplotlib==3.10.7
