@@ -40,7 +40,27 @@ export function RazorpayPanel({ keyId }: { keyId: string | null }) {
         key: keyId, order_id: order.id, amount: order.amount, currency: "INR",
         name: merchant, description: "test payment",
         prefill: { email: ident.email, contact: ident.contact },
-        handler: (resp: any) => add(`paid — ${resp.razorpay_payment_id}`),
+        handler: async (resp: any) => {
+          add(`paid — ${resp.razorpay_payment_id}, ingesting…`);
+          try {
+            // ingest immediately (no webhook / ngrok needed for local testing).
+            // card metadata = the standard Razorpay test Visa card.
+            const r = await api.verify({
+              razorpay_order_id: order.id,
+              razorpay_payment_id: resp.razorpay_payment_id,
+              razorpay_signature: resp.razorpay_signature,
+              payment: {
+                id: resp.razorpay_payment_id, amount: amount * 100, method: "card",
+                email: ident.email, contact: ident.contact,
+                card: { last4: "1111", network: "Visa", type: "credit", international: false },
+                notes: { sentinel_merchant: merchant },
+              },
+            });
+            add(`ingested · risk ${Number(r.score ?? 0).toFixed(2)}`);
+          } catch (e) {
+            add("verify/ingest failed: " + String(e));
+          }
+        },
         modal: { ondismiss: () => add("checkout dismissed") },
         theme: { color: "#0d94fb" },
       });

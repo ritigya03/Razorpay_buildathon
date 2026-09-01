@@ -81,6 +81,11 @@ export const api = {
       method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify({ amount_paise, receipt: "sentinel_demo", notes }),
     }).then(j),
+  verify: (body: Record<string, unknown>) =>
+    fetch("/api/verify", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    }).then(j),
   demoScenario: (kind: "shared_card" | "carding", size = 4) =>
     fetch("/api/demo/scenario", {
       method: "POST", headers: { "content-type": "application/json" },
