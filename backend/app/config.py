@@ -34,9 +34,28 @@ class Settings(BaseSettings):
     razorpay_key_secret: str = ""
     razorpay_webhook_secret: str = ""
 
+    # Phase 5 agent — Google Gemini (free tier). /api/agent/* 503s until a key is set.
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-3.1-flash-lite"
+
     @property
     def razorpay_ready(self) -> bool:
         return bool(self.razorpay_key_id and self.razorpay_key_secret)
+
+    @property
+    def agent_ready(self) -> bool:
+        import os
+        return bool(
+            self.gemini_api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+        )
+
+    def gemini_key(self) -> str:
+        import os
+        return (
+            self.gemini_api_key
+            or os.getenv("GEMINI_API_KEY", "")
+            or os.getenv("GOOGLE_API_KEY", "")
+        )
 
 
 settings = Settings()

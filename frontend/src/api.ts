@@ -43,6 +43,10 @@ export interface Alert {
   txn_id: string | null; summary: string; score: number;
 }
 
+export interface AgentHealth { ok: boolean; model: string | null; error: string | null; }
+export interface AgentToolCall { tool: string; args: Record<string, unknown>; summary: string; }
+export interface AgentReply { reply: string; tool_calls: AgentToolCall[]; model: string; }
+
 const j = async (r: Response) => {
   if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
   return r.json();
@@ -69,5 +73,17 @@ export const api = {
     fetch("/api/orders", {
       method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify({ amount_paise, receipt: "sentinel_demo" }),
+    }).then(j),
+
+  agentHealth: (): Promise<AgentHealth> => fetch("/api/agent/health").then(j),
+  agentChat: (message: string, session_id = "dashboard"): Promise<AgentReply> =>
+    fetch("/api/agent/chat", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message, session_id }),
+    }).then(j),
+  agentReset: (session_id = "dashboard") =>
+    fetch("/api/agent/reset", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ session_id }),
     }).then(j),
 };

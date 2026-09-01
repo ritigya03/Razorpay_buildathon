@@ -28,6 +28,10 @@ Optional Razorpay: `cp backend/.env.example backend/.env` and fill in test keys.
 Without them the replay feed still runs; only `/api/orders`, `/api/verify` and
 webhook-signature verification need keys.
 
+Optional Phase 5 agent: set `SENTINEL_GEMINI_API_KEY` in `backend/.env` (free key
+from <https://aistudio.google.com/apikey>). Without it every endpoint except
+`/api/agent/chat` works normally.
+
 For local webhook testing: `ngrok http 8000`, then add
 `https://<id>.ngrok.io/webhook/razorpay` in the Razorpay dashboard and subscribe
 to `payment.captured`, `payment.dispute.created/won/lost/closed`.
@@ -48,6 +52,9 @@ to `payment.captured`, `payment.dispute.created/won/lost/closed`.
 | POST | `/api/verify` | verify a payment signature, ingest the payment |
 | POST | `/webhook/razorpay` | Razorpay webhook receiver (signature-checked) |
 | POST | `/api/simulate/dispute` | `{}` = auto-pick, or `{"txn_id": "..."}` |
+| GET | `/api/agent/health` | Phase 5 agent status (`ok`, `model`, `error`) |
+| POST | `/api/agent/chat` | `{"message": "...", "session_id"?: "..."}` → risk-analyst reply + tool calls |
+| POST | `/api/agent/reset` | clear a chat session's history |
 
 ## Tests
 
@@ -70,5 +77,6 @@ app/replay.py         time-compressed replay of the held-out split
 app/rules.py          rules score for live Razorpay payments
 app/razorpay_client.py order create + signature verification
 app/events.py         ingest payments / disputes, dispute simulation
+app/agent.py          Phase 5 risk-analyst agent (Gemini + read-only tools)
 app/main.py           FastAPI app + routes
 ```

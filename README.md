@@ -28,7 +28,7 @@ Running engineering journal (decisions, dead ends, bugs): [`DEVLOG.md`](DEVLOG.m
 | **3** | FastAPI backend: replay feed + Razorpay test-mode Payments/Disputes | ✅ done |
 | **6** | React dashboard (Vite + Recharts + SVG ring graph) | ✅ done |
 | **4** | Federated learning + DP + Byzantine robustness — side experiment ([details](report/PHASE4.md)) | ✅ done |
-| 5 | Agent layer (Claude Agent SDK): explain ring, suggest mitigation | — |
+| **5** | Risk-analyst agent: read-only tools over the live store, forensic reports, escalation notes | ✅ done |
 
 ### Phase 1 — transaction scorer (held-out test = final 15% of the timeline, by date)
 
@@ -60,11 +60,11 @@ how many hours earlier Sentinel flagged it (~40h in a typical run).
 
 ### Phase 6 — dashboard ([frontend/README.md](frontend/README.md))
 
-React + Vite. Seven tabs: Overview (replay + live metrics), Feed (transaction
+React + Vite. Eight tabs: Overview (replay + live metrics), Feed (transaction
 stream), Rings (flagged rings + SVG member graph), Disputes (chargeback loop +
-lead time), Metrics (held-out PR / cost curves), Federated (Phase 4), Razorpay
-(real test-mode checkout). `cd frontend && npm install && npm run dev` →
-http://localhost:5173.
+lead time), Metrics (held-out PR / cost curves), Federated (Phase 4), Agent
+(Phase 5 chat), Razorpay (real test-mode checkout). `cd frontend && npm install
+&& npm run dev` → http://localhost:5173.
 
 ### Phase 4 — federated learning + DP ([details](report/PHASE4.md))
 
@@ -92,6 +92,28 @@ Transformer 0.409). The point is the *relative* comparisons:
 `make fl-deps` (own `.venv-fl` — Flower pins conflict with the backend's
 FastAPI), then `make fl` → `report/fl_metrics.json` +
 `report/figures/fl_epsilon_curve.png`.
+
+### Phase 5 — risk-analyst agent ([backend/app/agent.py](backend/app/agent.py))
+
+A conversational layer over the same event store the dashboard reads. The agent
+has **four read-only tools** — situation summary, flagged-ring list, ring
+detail, recent disputes — and no write tools; it grounds every number in a tool
+call and turns the technical state into a briefing, a forensic report, or a
+draft escalation note a human reviewer can act on. Rings churn ids on every
+replay tick, so it addresses a ring by **rank** ("1" = highest risk) or by its
+stable **`kind|key`** fingerprint.
+
+Runs inside the Phase-3 backend (`POST /api/agent/chat`, `GET /api/agent/health`),
+surfaced as the dashboard's **Agent** tab. Powered by **Google Gemini**
+(`gemini-3.1-flash-lite`, free tier) — set `SENTINEL_GEMINI_API_KEY` in
+`backend/.env` (key from <https://aistudio.google.com/apikey>). Without a key the
+replay, dashboard and every other tab still run; only the Agent tab needs it.
+`make test` exercises the tools directly (no model call — no quota spent).
+
+> The concept doc (`project_sentinel.md` §4.3) names the Claude Agent SDK; the
+> shipped agent is the same shape — a supervised tool-calling loop — on Gemini's
+> free tier so the demo has no per-call cost. Advisory only: it never blocks
+> anything and has no write path.
 
 ---
 
@@ -128,7 +150,8 @@ train/model_ring.py       Phase 2a experiment      -> report/metrics_ring.json  
 train/ring_engine.py      Phase 2b ring engine     -> report/ring_metrics.json
 report/PHASE2.md          write-up of the ring work
 backend/                  FastAPI service            (Phase 3)
-frontend/                 React dashboard            (Phase 6)
+backend/app/agent.py      Phase 5: risk-analyst agent (Gemini + read-only tools)
+frontend/                 React dashboard            (Phase 6, + Agent tab = Phase 5)
 train/fl_data.py          Phase 4: dense matrices + non-IID merchant partition
 train/fl_model.py         Phase 4: MLP + focal loss + centralized trainer
 train/fl_strategy.py      Phase 4: SentinelFedAvg (commit/reveal, poison filter, Merkle)

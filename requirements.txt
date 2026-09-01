@@ -17,3 +17,6 @@ python-dotenv==1.2.3
 razorpay==2.0.1
 httpx==0.28.1
 pytest==9.1.1
+
+# Phase 5 — risk-analyst agent (Google Gemini, free tier)
+google-genai==2.21.0

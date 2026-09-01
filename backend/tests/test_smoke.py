@@ -46,6 +46,28 @@ def test_replay_pipeline_and_dispute_loop():
         disputes = client.get("/api/disputes").json()
         assert len(disputes) == 1 and disputes[0]["was_flagged"] is True
 
+        # Phase 5 — the agent's read-only tools work off the same store (no LLM
+        # call here; that would spend API quota on every `make test`).
+        from backend.app import agent as agent_mod
+
+        summ = agent_mod.get_situation_summary()
+        assert summ["rings_flagged"] >= 1 and summ["flagged_transactions"] > 0
+        listed = agent_mod.list_flagged_rings(5)
+        assert listed["count"] >= 1
+        assert listed["rings"][0]["rank"] == 1 and "|" in listed["rings"][0]["ring_key"]
+        det = agent_mod.get_ring_detail("1")
+        assert det.get("members") and det["rank"] == 1
+        assert agent_mod.get_ring_detail("999999").get("error")  # bad ref -> clean error
+
+
+def test_agent_health_and_input_validation():
+    with TestClient(app) as client:
+        h = client.get("/api/agent/health").json()
+        assert set(h) == {"ok", "model", "error"}
+        # empty message is rejected before any model call
+        r = client.post("/api/agent/chat", json={"message": "  "})
+        assert r.status_code == 400
+
 
 def test_orders_endpoint_503_without_keys():
     with TestClient(app) as client:

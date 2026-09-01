@@ -513,3 +513,81 @@ costs 0.020 PR-AUC (~5%). All 15 sanity assertions pass. `make fl` ≈ 6.5 min;
 `--quick` (3 rounds) ≈ 3 min. Notes: DP batch 8192 quadrupled wall time for a
 marginal gain — settled on 4096. SWA never beat best-val selection at 5 rounds
 (no drift to average out) but stays as a guard-rail and is reported.
+
+---
+
+## Phase 5 — risk-analyst agent (2026-09-01)
+
+Turns `project_sentinel.md` §4.3 (an agent that explains a ring and drafts
+mitigation) into running code. Lives **inside the Phase-3 backend**
+(`backend/app/agent.py`, routes `POST /api/agent/chat`, `GET /api/agent/health`,
+`POST /api/agent/reset`), surfaced as the dashboard's **Agent** tab
+(`frontend/src/components/Agent.tsx`).
+
+### Provider — Gemini, not Claude (cost, not preference)
+
+Phase 0 decided "Claude Agent SDK (same as Razorpay Agent Studio)". User has no
+paid API access and required a **free** key, so the shipped agent runs on
+**Google Gemini free tier** (`google-genai` 2.21.0, installs clean on 3.14 — all
+heavy deps already vendored). Same architecture — a supervised tool-calling loop
+with a system brief — different model. `project_sentinel.md` §4.3/§6.1 actually
+named "Gemini via Vertex AI" for the report generator originally, so this is
+consistent with the concept doc; the deviation from the Phase-0 note is recorded
+here.
+
+### Model — `gemini-3.1-flash-lite`
+
+- `gemini-2.5-flash` → **404 "no longer available to new users"** on a fresh key
+  (the API now points new keys at 3.x). `gemini-3.6-flash` works but its free
+  tier is **5 requests/min**, and one agent turn with AFC = 2–4 requests, so two
+  questions exhaust it.
+- `gemini-3.1-flash-lite` cleared a 9-call burst with no 429 — far more free-tier
+  headroom. Made it the default (`SENTINEL_GEMINI_MODEL`, overridable).
+- 429s are still possible under rapid fire; caught and returned as HTTP 429 with
+  a "wait ~30s" message the Agent tab renders inline (not a red error).
+
+### Tools — read-only, four of them
+
+`get_situation_summary` (no args), `list_flagged_rings(limit)`,
+`get_ring_detail(ring)`, `get_recent_disputes(limit)`. All query the same SQLite
+event store the dashboard reads; **no write tools** — the agent cannot block,
+dispute, or mutate anything. Each is wrapped by a decorator that records the call
+(surfaced to the UI as tool chips) and converts any exception into a clean
+`{"error": …}` result rather than a raw traceback.
+
+### Dead end 1 — `from __future__ import annotations` breaks Gemini AFC
+
+`get_situation_summary` and `list_flagged_rings` worked; `get_ring_detail` (the
+only tool with a **required** arg) always failed inside automatic function
+calling with `isinstance() arg 2 must be a type, a tuple of types, or a union`.
+Cause: the Gemini SDK coerces incoming tool args against the function's real
+annotation objects; under `from __future__ import annotations` those are lazy
+strings (`'str'`), so `isinstance(value, 'str')` throws. The model then
+confabulated a "technical issue retrieving ring details". Fix: drop the future
+import in `agent.py` only (all its annotations — `str | None`, `dict[str, …]` —
+are runtime-safe on 3.14 anyway). `functools.wraps` on the decorator then carries
+the real types through.
+
+### Dead end 2 — ring ids are not stable
+
+`recompute_rings` does a full DELETE + reinsert of the `Ring` table every replay
+tick, so `ring.id` climbs continuously and "explain ring #42" breaks seconds
+later when #42 has been renumbered. Fixed agent-side: `list_flagged_rings`
+returns a `rank` (1 = highest risk) and a stable `ring_key` (`kind|key`);
+`get_ring_detail` accepts either and never a bare id. System brief tells the
+model ids are unstable and to re-list if unsure.
+
+### Verified
+
+`make test` — the pipeline test now also calls the three read tools directly
+(no model call, no quota spent) and asserts shape; a new
+`test_agent_health_and_input_validation` checks `/api/agent/health` and the
+empty-message 400. Live end-to-end (TestClient + real Gemini key): turn 1
+`get_situation_summary` + `list_flagged_rings` → a grounded briefing with a real
+ring table; turn 2 `get_ring_detail("1")` → a forensic report (shared
+fingerprint, distinct accounts/cards, window, all-fraud) with the honest
+coordinated-slice caveat, plus a drafted escalation note. `npm run build` clean
+(bundle 567 kB / 163 kB gzip — recharts still dominates; the ~50-line inline
+markdown renderer in `Agent.tsx` avoids a new dep). Pre-existing
+`test_orders_endpoint_503_without_keys` still fails for the Phase-4 reason (real
+Razorpay keys in `backend/.env`), untouched by Phase 5.

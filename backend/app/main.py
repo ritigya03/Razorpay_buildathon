@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func
 from sqlmodel import Session, select
 
+from .agent import agent
 from .config import settings
 from .db import engine, get_session, init_db
 from .events import (
@@ -50,6 +51,7 @@ def health() -> dict:
         "ok": True, "model_loaded": scorer.ok,
         "razorpay_ready": settings.razorpay_ready,
         "razorpay_key_id": settings.razorpay_key_id or None,  # public key, safe to expose
+        "agent_ready": agent.ok,
     }
 
 
@@ -267,3 +269,34 @@ def simulate_dispute(payload: dict = Body(default={}), s: Session = Depends(get_
     return {"dispute_id": disp.id, "payment_id": disp.payment_id,
             "was_flagged": disp.was_flagged, "lead_time_hours": disp.lead_time_hours,
             "ring_id": disp.ring_id}
+
+
+# --------------------------------------------------------------------------- #
+# Phase 5 — risk-analyst agent (Gemini + read-only tools over the event store)
+# --------------------------------------------------------------------------- #
+@app.get("/api/agent/health")
+def agent_health() -> dict:
+    return agent.status()
+
+
+@app.post("/api/agent/chat")
+def agent_chat(payload: dict = Body(...)) -> dict:
+    if not agent.ok:
+        raise HTTPException(503, agent.error or "agent not configured")
+    message = (payload.get("message") or "").strip()
+    if not message:
+        raise HTTPException(400, "message is required")
+    session_id = str(payload.get("session_id") or "default")
+    try:
+        return agent.chat(message, session_id=session_id)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except RuntimeError as e:
+        msg = str(e)
+        raise HTTPException(429 if msg.startswith("RATE_LIMIT:") else 502, msg)
+
+
+@app.post("/api/agent/reset")
+def agent_reset(payload: dict = Body(default={})) -> dict:
+    agent.reset(str(payload.get("session_id") or "default"))
+    return {"ok": True}
