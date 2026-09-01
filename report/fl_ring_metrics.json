@@ -1,0 +1,480 @@
+{
+  "meta": {
+    "phase": 8,
+    "seed": 42,
+    "n_merchants": 8,
+    "cap_txns": 40,
+    "entity": "device fingerprint + shipping-address tuple",
+    "cross_merchant_ring": "2<=txns<=CAP, >=2 fraud txns, spans >=2 merchants",
+    "scorer": "Phase-1 LightGBM; each merchant buckets its own transactions into 5 risk buckets ([0.0, 0.2, 0.4, 0.6, 0.8, 1.01]). Identical scorer/bucketing across both arms.",
+    "flag_rule": "spans >=2 merchants AND 2<=txns<=CAP AND risk-estimate (bucket-midpoint weighted mean) >= tuned threshold",
+    "threshold_tuned_on": "validation (best F1 over all val fraud rings), applied once to test",
+    "released_per_merchant": "salted-HMAC fingerprint -> Gaussian-DP-noised risk-bucket count vector (L2 sensitivity 1 -> one sigma, no budget split)",
+    "dp": {
+      "mechanism": "Gaussian mechanism on the per-fingerprint bucket vector",
+      "delta": 1e-05
+    },
+    "robust_aggregation": "reject a merchant whose total volume > 5.0x the median merchant, or whose aggregate risk-estimate > 2.0x the median; plus the commit/reveal digest check",
+    "thresholds": {
+      "device": 0.17,
+      "address": 0.14
+    },
+    "limitations": [
+      "synthetic merchants (hash(card1) % N) \u2014 no merchant column in IEEE-CIS",
+      "scorer is centralised LightGBM held fixed; a fully federated stack would use the Phase-4 federated MLP (Phase 4: ~0.01 PR-AUC vs centralised) \u2014 the two costs compose",
+      "DP-noised histogram sharing is a simplified stand-in for a real private-set-intersection / secure-aggregation protocol",
+      "silent (non-participation) poisoning is an incentive/audit problem, not defensible at the aggregation layer \u2014 only active (hot-flood) poisoning is shown defended"
+    ]
+  },
+  "ground_truth": {
+    "device": {
+      "fingerprints_in_window": 565,
+      "fraud_rings": 100,
+      "cross_merchant_fraud_rings": 83,
+      "single_merchant_fraud_rings": 17
+    },
+    "address": {
+      "fingerprints_in_window": 622,
+      "fraud_rings": 38,
+      "cross_merchant_fraud_rings": 35,
+      "single_merchant_fraud_rings": 3
+    }
+  },
+  "centralized": {
+    "device": {
+      "flagged": 83,
+      "tp": 62,
+      "fp": 21,
+      "fn": 21,
+      "precision": 0.747,
+      "recall": 0.747,
+      "f1": 0.747
+    },
+    "address": {
+      "flagged": 31,
+      "tp": 16,
+      "fp": 15,
+      "fn": 19,
+      "precision": 0.5161,
+      "recall": 0.4571,
+      "f1": 0.4848
+    },
+    "combined": {
+      "flagged": 114,
+      "tp": 78,
+      "fp": 36,
+      "fn": 40,
+      "precision": 0.6842,
+      "recall": 0.661,
+      "f1": 0.6724
+    }
+  },
+  "federated_no_dp": {
+    "device": {
+      "flagged": 83,
+      "tp": 62,
+      "fp": 21,
+      "fn": 21,
+      "precision": 0.747,
+      "recall": 0.747,
+      "f1": 0.747
+    },
+    "address": {
+      "flagged": 31,
+      "tp": 16,
+      "fp": 15,
+      "fn": 19,
+      "precision": 0.5161,
+      "recall": 0.4571,
+      "f1": 0.4848
+    },
+    "combined": {
+      "flagged": 114,
+      "tp": 78,
+      "fp": 36,
+      "fn": 40,
+      "precision": 0.6842,
+      "recall": 0.661,
+      "f1": 0.6724
+    },
+    "merkle_root": "f67107ef76650574410263869a0f1a65a3a540427770509ee19ea6005faa4b8b",
+    "rejections": [],
+    "thresholds": {
+      "device": 0.17,
+      "address": 0.14
+    }
+  },
+  "dp_sweep": [
+    {
+      "epsilon": null,
+      "device": {
+        "flagged": 83,
+        "tp": 62,
+        "fp": 21,
+        "fn": 21,
+        "precision": 0.747,
+        "recall": 0.747,
+        "f1": 0.747
+      },
+      "address": {
+        "flagged": 31,
+        "tp": 16,
+        "fp": 15,
+        "fn": 19,
+        "precision": 0.5161,
+        "recall": 0.4571,
+        "f1": 0.4848
+      },
+      "combined": {
+        "flagged": 114,
+        "tp": 78,
+        "fp": 36,
+        "fn": 40,
+        "precision": 0.6842,
+        "recall": 0.661,
+        "f1": 0.6724
+      },
+      "merkle_root": "f67107ef76650574410263869a0f1a65a3a540427770509ee19ea6005faa4b8b",
+      "rejections": [],
+      "thresholds": {
+        "device": 0.17,
+        "address": 0.14
+      }
+    },
+    {
+      "epsilon": 32.0,
+      "thresholds": {
+        "device": 0.17,
+        "address": 0.14
+      },
+      "n_repeats": 5,
+      "merkle_root": "2cfd219075dab87bd61e1791d38317aee057b643912aa5738e9a54504c76ed13",
+      "rejections": [],
+      "device": {
+        "precision": 0.74,
+        "precision_std": 0.0086,
+        "recall": 0.747,
+        "recall_std": 0.0,
+        "f1": 0.7434,
+        "f1_std": 0.0044
+      },
+      "address": {
+        "precision": 0.483,
+        "precision_std": 0.0224,
+        "recall": 0.4571,
+        "recall_std": 0.0,
+        "f1": 0.4695,
+        "f1_std": 0.0108
+      },
+      "combined": {
+        "precision": 0.667,
+        "precision_std": 0.0143,
+        "recall": 0.661,
+        "recall_std": 0.0,
+        "f1": 0.6639,
+        "f1_std": 0.0071
+      }
+    },
+    {
+      "epsilon": 16.0,
+      "thresholds": {
+        "device": 0.51,
+        "address": 0.51
+      },
+      "n_repeats": 5,
+      "merkle_root": "e210b595caa32ac70c7c1d4d4c28b23121391393fd366fca5fede9c0242b339d",
+      "rejections": [],
+      "device": {
+        "precision": 0.9606,
+        "precision_std": 0.0247,
+        "recall": 0.3494,
+        "recall_std": 0.0132,
+        "f1": 0.5123,
+        "f1_std": 0.0157
+      },
+      "address": {
+        "precision": 0.8833,
+        "precision_std": 0.1453,
+        "recall": 0.0971,
+        "recall_std": 0.014,
+        "f1": 0.174,
+        "f1_std": 0.0216
+      },
+      "combined": {
+        "precision": 0.9488,
+        "precision_std": 0.0352,
+        "recall": 0.2746,
+        "recall_std": 0.0115,
+        "f1": 0.4257,
+        "f1_std": 0.0141
+      }
+    },
+    {
+      "epsilon": 8.0,
+      "thresholds": {
+        "device": 0.51,
+        "address": 0.55
+      },
+      "n_repeats": 5,
+      "merkle_root": "f2213b23c17c87d8ecc3964ba31cde600ed2d1d8a644cb894a533657ab9b3828",
+      "rejections": [],
+      "device": {
+        "precision": 0.8505,
+        "precision_std": 0.045,
+        "recall": 0.3494,
+        "recall_std": 0.0275,
+        "f1": 0.4943,
+        "f1_std": 0.0274
+      },
+      "address": {
+        "precision": 0.3216,
+        "precision_std": 0.1131,
+        "recall": 0.0514,
+        "recall_std": 0.0114,
+        "f1": 0.0877,
+        "f1_std": 0.0193
+      },
+      "combined": {
+        "precision": 0.7697,
+        "precision_std": 0.0322,
+        "recall": 0.261,
+        "recall_std": 0.021,
+        "f1": 0.3888,
+        "f1_std": 0.0196
+      }
+    },
+    {
+      "epsilon": 4.0,
+      "thresholds": {
+        "device": 0.51,
+        "address": 0.55
+      },
+      "n_repeats": 5,
+      "merkle_root": "a553844596bef5328ac13ddb4f428213af67c708226add620af3a13104ef8e6a",
+      "rejections": [],
+      "device": {
+        "precision": 0.5205,
+        "precision_std": 0.0272,
+        "recall": 0.3494,
+        "recall_std": 0.0304,
+        "f1": 0.4173,
+        "f1_std": 0.0261
+      },
+      "address": {
+        "precision": 0.0992,
+        "precision_std": 0.0538,
+        "recall": 0.0629,
+        "recall_std": 0.0333,
+        "f1": 0.0767,
+        "f1_std": 0.0408
+      },
+      "combined": {
+        "precision": 0.3984,
+        "precision_std": 0.0078,
+        "recall": 0.2644,
+        "recall_std": 0.0259,
+        "f1": 0.3174,
+        "f1_std": 0.0213
+      }
+    },
+    {
+      "epsilon": 2.0,
+      "thresholds": {
+        "device": 0.53,
+        "address": 0.57
+      },
+      "n_repeats": 5,
+      "merkle_root": "0f4268ee74774639d01b2f675b76a7582de9bfa1d21032eb5f6dd394a7ef0015",
+      "rejections": [],
+      "device": {
+        "precision": 0.3325,
+        "precision_std": 0.0196,
+        "recall": 0.2795,
+        "recall_std": 0.0289,
+        "f1": 0.3031,
+        "f1_std": 0.0223
+      },
+      "address": {
+        "precision": 0.0456,
+        "precision_std": 0.0186,
+        "recall": 0.0514,
+        "recall_std": 0.0214,
+        "f1": 0.0483,
+        "f1_std": 0.0199
+      },
+      "combined": {
+        "precision": 0.2294,
+        "precision_std": 0.0149,
+        "recall": 0.2119,
+        "recall_std": 0.0161,
+        "f1": 0.2202,
+        "f1_std": 0.0147
+      }
+    },
+    {
+      "epsilon": 1.0,
+      "thresholds": {
+        "device": 0.64,
+        "address": 0.54
+      },
+      "n_repeats": 5,
+      "merkle_root": "fce3457ac4d71b12d212d45ff9ccb97909cbfddfd94a1da598f806b4046817de",
+      "rejections": [],
+      "device": {
+        "precision": 0.2234,
+        "precision_std": 0.0697,
+        "recall": 0.0626,
+        "recall_std": 0.0193,
+        "f1": 0.0974,
+        "f1_std": 0.0291
+      },
+      "address": {
+        "precision": 0.042,
+        "precision_std": 0.0158,
+        "recall": 0.0857,
+        "recall_std": 0.0313,
+        "f1": 0.0564,
+        "f1_std": 0.0209
+      },
+      "combined": {
+        "precision": 0.0862,
+        "precision_std": 0.0233,
+        "recall": 0.0695,
+        "recall_std": 0.0189,
+        "f1": 0.0769,
+        "f1_std": 0.0207
+      }
+    }
+  ],
+  "poison_demo": {
+    "hot_flood_no_defense": {
+      "device": {
+        "flagged": 186,
+        "tp": 71,
+        "fp": 115,
+        "fn": 12,
+        "precision": 0.3817,
+        "recall": 0.8554,
+        "f1": 0.5279
+      },
+      "address": {
+        "flagged": 254,
+        "tp": 25,
+        "fp": 229,
+        "fn": 10,
+        "precision": 0.0984,
+        "recall": 0.7143,
+        "f1": 0.173
+      },
+      "combined": {
+        "flagged": 440,
+        "tp": 96,
+        "fp": 344,
+        "fn": 22,
+        "precision": 0.2182,
+        "recall": 0.8136,
+        "f1": 0.3441
+      },
+      "merkle_root": "95ee44a489aa33e389af78ee1137d8dd4f5a187bbfedbededfaf2731d36882b4",
+      "rejections": [],
+      "thresholds": {
+        "device": 0.17,
+        "address": 0.14
+      }
+    },
+    "hot_flood_defended": {
+      "device": {
+        "flagged": 72,
+        "tp": 53,
+        "fp": 19,
+        "fn": 30,
+        "precision": 0.7361,
+        "recall": 0.6386,
+        "f1": 0.6839
+      },
+      "address": {
+        "flagged": 31,
+        "tp": 14,
+        "fp": 17,
+        "fn": 21,
+        "precision": 0.4516,
+        "recall": 0.4,
+        "f1": 0.4242
+      },
+      "combined": {
+        "flagged": 103,
+        "tp": 67,
+        "fp": 36,
+        "fn": 51,
+        "precision": 0.6505,
+        "recall": 0.5678,
+        "f1": 0.6063
+      },
+      "merkle_root": "95ee44a489aa33e389af78ee1137d8dd4f5a187bbfedbededfaf2731d36882b4",
+      "rejections": [
+        {
+          "merchant": 0,
+          "reason": "risk_estimate_outlier",
+          "ratio": 5.2,
+          "kind": "device"
+        },
+        {
+          "merchant": 0,
+          "reason": "risk_estimate_outlier",
+          "ratio": 8.58,
+          "kind": "address"
+        }
+      ],
+      "thresholds": {
+        "device": 0.17,
+        "address": 0.14
+      }
+    },
+    "commit_mismatch_defended": {
+      "device": {
+        "flagged": 72,
+        "tp": 53,
+        "fp": 19,
+        "fn": 30,
+        "precision": 0.7361,
+        "recall": 0.6386,
+        "f1": 0.6839
+      },
+      "address": {
+        "flagged": 31,
+        "tp": 14,
+        "fp": 17,
+        "fn": 21,
+        "precision": 0.4516,
+        "recall": 0.4,
+        "f1": 0.4242
+      },
+      "combined": {
+        "flagged": 103,
+        "tp": 67,
+        "fp": 36,
+        "fn": 51,
+        "precision": 0.6505,
+        "recall": 0.5678,
+        "f1": 0.6063
+      },
+      "merkle_root": "f67107ef76650574410263869a0f1a65a3a540427770509ee19ea6005faa4b8b",
+      "rejections": [
+        {
+          "merchant": 0,
+          "reason": "commitment_mismatch",
+          "kind": "device"
+        },
+        {
+          "merchant": 0,
+          "reason": "commitment_mismatch",
+          "kind": "address"
+        }
+      ],
+      "thresholds": {
+        "device": 0.17,
+        "address": 0.14
+      }
+    }
+  }
+}

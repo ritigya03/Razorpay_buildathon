@@ -51,6 +51,12 @@ fl-deps:
 fl:
 	$(PY_FL) -u train/fl_experiment.py
 
+# Phase 8 — federated cross-merchant ring detection (centralized vs federated +
+# DP + flood-poison defense). Core .venv (LightGBM score held fixed across arms;
+# no torch/flwr). -> report/fl_ring_metrics.json
+fl-rings:
+	$(PY) train/fl_rings.py
+
 # Phase 3 — run the backend (needs `make baseline` first for the model + spec)
 backend:
 	.venv/bin/uvicorn backend.app.main:app --reload --port 8000
