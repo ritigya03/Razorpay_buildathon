@@ -57,6 +57,8 @@ to `payment.captured`, `payment.dispute.created/won/lost/closed`.
 | GET | `/api/agent/health` | Phase 5 agent status (`ok`, `model`, `error`) |
 | POST | `/api/agent/chat` | `{"message": "...", "session_id"?: "..."}` → risk-analyst reply + tool calls |
 | POST | `/api/agent/reset` | clear a chat session's history |
+| GET | `/api/fl-ring-report` | Phase 8 federated-vs-centralized ring metrics (404 until `make fl-rings`) |
+| POST | `/api/fl/detect-live` | Phase 8 runtime protocol over the live payments; optional `{"epsilon": <float>}` |
 
 ## Tests
 
@@ -80,5 +82,6 @@ app/rules.py          rules score for live Razorpay payments (+ shared-entity ve
 app/razorpay_client.py order create + signature verification
 app/events.py         ingest payments / disputes, dispute simulation
 app/agent.py          Phase 5 risk-analyst agent (Gemini + read-only tools)
+app/fl_live.py        Phase 8 federated cross-merchant detection over live payments
 app/main.py           FastAPI app + routes
 ```

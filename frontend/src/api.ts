@@ -58,6 +58,12 @@ export const api = {
   stats: (): Promise<Stats> => fetch("/api/stats").then(j),
   report: () => fetch("/api/report").then(j),
   flReport: () => fetch("/api/fl-report").then(j),
+  flRingReport: () => fetch("/api/fl-ring-report").then(j),
+  flDetectLive: (epsilon?: number | null) =>
+    fetch("/api/fl/detect-live", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ epsilon: epsilon ?? null }),
+    }).then(j),
   transactions: (q = "?limit=60"): Promise<Txn[]> => fetch(`/api/transactions${q}`).then(j),
   rings: (q = "?flagged=true&limit=40"): Promise<Ring[]> => fetch(`/api/rings${q}`).then(j),
   ring: (id: number): Promise<{ ring: Ring; members: Txn[] }> => fetch(`/api/rings/${id}`).then(j),

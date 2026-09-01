@@ -27,8 +27,10 @@ Running engineering journal (decisions, dead ends, bugs): [`DEVLOG.md`](DEVLOG.m
 | **2** | Ring / entity work: feature experiment (negative) + ring engine (triage) | ✅ done |
 | **3** | FastAPI backend: replay feed + Razorpay test-mode Payments/Disputes | ✅ done |
 | **6** | React dashboard (Vite + Recharts + SVG ring graph) | ✅ done |
-| **4** | Federated learning + DP + Byzantine robustness — side experiment ([details](report/PHASE4.md)) | ✅ done |
+| **4** | Federated learning + DP + Byzantine robustness on the *classifier* ([details](report/PHASE4.md)) | ✅ done |
 | **5** | Risk-analyst agent: read-only tools over the live store, forensic reports, escalation notes | ✅ done |
+| **7** | Live Razorpay detection: card / carding rings from real payments across merchants | ✅ done |
+| **8** | **Federated cross-merchant ring detection vs centralized + DP + poison** ([details](report/PHASE8.md)) | ✅ done |
 
 ### Phase 1 — transaction scorer (held-out test = final 15% of the timeline, by date)
 
@@ -45,9 +47,11 @@ Running engineering journal (decisions, dead ends, bugs): [`DEVLOG.md`](DEVLOG.m
   pre-engineered Vesta columns already capture entity/velocity/ring signal.
   Kept as a documented negative result (`model_ring.py`).
 - **Ring engine (triage):** groups transactions into coordinated device/address
-  rings. Held-out **device rings: precision 0.75, recall 0.75**. Collapses
-  18,001 transaction alerts into **132 ring alerts (~136× fewer)**; covers 16.5%
-  of all fraud (the coordinated slice — ceiling stated openly).
+  rings. Held-out **device rings: precision 0.72, recall 0.82** (F1 0.77);
+  address rings 0.42 / 0.40. Collapses 17,835 transaction alerts into **144 ring
+  alerts (~124× fewer)**; covers 17.5% of all fraud (the coordinated slice —
+  ceiling stated openly). Numbers regenerate via `make ring-engine` →
+  `report/ring_metrics.json` (what the dashboard reads).
 
 ### Phase 3 — backend ([backend/README.md](backend/README.md))
 
@@ -103,6 +107,51 @@ Transformer 0.409). The point is the *relative* comparisons:
 FastAPI), then `make fl` → `report/fl_metrics.json` +
 `report/figures/fl_epsilon_curve.png`.
 
+### Phase 8 — federated cross-merchant ring detection ([details](report/PHASE8.md))
+
+The pitch is *"cross-merchant fraud-ring intelligence through Federated Learning
+and Differential Privacy."* This phase builds that detector and **measures it
+against the centralized version**, which stays for the comparison. The
+per-transaction score (Phase-1 LightGBM) is held identical in both arms, so the
+comparison isolates the cost of federating the *ring layer*.
+
+Each of 8 synthetic merchants (`hash(card1) % 8`) sees only its own rows. Per
+**salted-HMAC** device / address fingerprint it releases a Gaussian-DP-noised
+**risk-bucket count vector** — never raw rows. Reports are committed (SHA-256)
+then revealed; the commitments hash into a **Merkle root**; a robust aggregator
+rejects volume / risk-estimate outliers and commitment mismatches. Summed
+vectors are flagged with the **same rule** as the centralized oracle.
+
+Held-out test (118 cross-merchant fraud rings; 20 single-merchant, for context):
+
+| detector | precision | recall | F1 |
+|---|---|---|---|
+| centralized (sees every transaction) | 0.68 | 0.66 | 0.67 |
+| **federated, no DP** (commit/reveal + Merkle + robust agg) | **0.68** | **0.66** | **0.67** |
+
+**Identical** — 78 TP / 36 FP / 40 FN in both. Federating the computation is
+free. The rest is honest cost:
+
+- **DP ε sweep:** ∞ → 0.67, ε=32 → 0.66, ε=16 → 0.43, ε=8 → 0.39, ε=1 → 0.08.
+  Free to ε≈32; below ε≈16 the ~1-transaction-per-merchant contributions to
+  small rings fall below the Gaussian noise floor. This regime widens with
+  per-merchant volume (Vulcan scale pushes the knee far below ε=1). Reported as
+  a cost, not spun.
+- **1 malicious merchant** (hot-flood): no-defense F1 0.34 → robust aggregator
+  0.61, merchant rejected every run; commit-mismatch caught by the digest check.
+
+`make fl-rings` → `report/fl_ring_metrics.json` (core `.venv`, seed 42, ~1 min,
+reproducible). Runtime version over the live Razorpay payments:
+`POST /api/fl/detect-live` and the Federated tab's "run it live" panel — per-merchant
+HMAC sketches → Merkle root → the emerged cross-merchant ring, with a centralized
+pass alongside.
+
+> **Honest limitations** ([PHASE8.md](report/PHASE8.md)): synthetic merchants;
+> the scorer is centralized LightGBM held fixed (a fully federated stack scores
+> with the Phase-4 MLP — costs compose); DP-noised histogram sharing is a
+> simplified stand-in for a real private-set-intersection protocol; silent
+> non-participation is an incentive problem, not an aggregation one.
+
 ### Phase 5 — risk-analyst agent ([backend/app/agent.py](backend/app/agent.py))
 
 A conversational layer over the same event store the dashboard reads. The agent
@@ -146,6 +195,13 @@ make fl-deps                        # .venv-fl (torch + opacus + flwr)
 make fl                             # -> report/fl_metrics.json  (~20 min; --quick ~90s)
 ```
 
+Phase 8 (federated cross-merchant ring detection) runs in the **core `.venv`** —
+the LightGBM score is held fixed, so no torch/flwr:
+
+```bash
+make fl-rings                       # -> report/fl_ring_metrics.json  (seed 42; ~1 min)
+```
+
 ---
 
 ## Layout
@@ -168,4 +224,8 @@ train/fl_strategy.py      Phase 4: SentinelFedAvg (commit/reveal, poison filter,
 train/fl_client.py        Phase 4: per-merchant client + attack modes
 train/fl_experiment.py    Phase 4: runs it all      -> report/fl_metrics.json
 report/PHASE4.md          write-up of the FL / DP / robustness experiment
+train/fl_crypto.py        Phase 8: commit / Merkle / salted-HMAC / DP-histogram (dependency-free)
+train/fl_rings.py         Phase 8: federated vs centralized ring detection -> report/fl_ring_metrics.json
+backend/app/fl_live.py    Phase 8: the runtime protocol over live Razorpay payments (/api/fl/detect-live)
+report/PHASE8.md          write-up of the federated cross-merchant ring experiment
 ```

@@ -4,6 +4,21 @@
 **Buildathon:** Razorpay AI Buildathon (applications close 5 September 2026)
 **Tagline:** *"We don't replace Vulcan. We unlock it for the privacy-first world."*
 
+> **This is the concept doc / original vision.** For what is actually built and
+> measured, see [`README.md`](README.md) and the phase write-ups in `report/`.
+> Key deviations from this doc, all recorded in [`DEVLOG.md`](DEVLOG.md):
+> the **Shadow Engine** (§4.2) was not built — the cross-merchant latency bridge
+> is instead the Phase-8 federated protocol (`train/fl_rings.py`,
+> `backend/app/fl_live.py`); the **agent** (§4.3) runs on Google Gemini's free
+> tier, not the Claude Agent SDK / Vertex, but is the same supervised
+> tool-calling shape; the graded scorer is centralised LightGBM (federated
+> learning of the *scorer* is Phase 4, an MLP; Phase 8 federates the *ring
+> detection layer* with the LightGBM score held fixed). The core claim —
+> *cross-merchant ring detection without pooling raw data, with DP* — is built
+> and measured in [`report/PHASE8.md`](report/PHASE8.md): federated == centralised
+> with no DP (F1 0.67 both), an honest DP cost below ε≈16, and a poisoned
+> merchant caught and recovered.
+
 ---
 
 ## 1. Executive Summary

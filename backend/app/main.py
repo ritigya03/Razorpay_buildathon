@@ -158,6 +158,27 @@ def fl_report() -> dict:
     return json.loads(p.read_text())
 
 
+@app.get("/api/fl-ring-report")
+def fl_ring_report() -> dict:
+    """Phase 8 — federated vs centralized cross-merchant ring detection
+    (404-safe; run `make fl-rings`)."""
+    p = settings.metrics_file.parent / "fl_ring_metrics.json"
+    if not p.exists():
+        raise HTTPException(404, "fl_ring_metrics.json not generated — run `make fl-rings`")
+    return json.loads(p.read_text())
+
+
+@app.post("/api/fl/detect-live")
+def fl_detect_live(payload: dict = Body(default={}), s: Session = Depends(get_session)) -> dict:
+    """Run the federated cross-merchant protocol over the LIVE Razorpay payments:
+    per-merchant salted-HMAC risk-bucket sketches -> Merkle root -> aggregate ->
+    flag cross-merchant rings, with a centralized pass alongside. Optional
+    {"epsilon": <float>} adds Gaussian DP noise to each sketch."""
+    from .fl_live import run_detection
+    eps = payload.get("epsilon")
+    return run_detection(s, float(eps) if eps not in (None, "", 0) else None)
+
+
 @app.get("/api/alerts")
 def list_alerts(
     limit: int = 50, kind: str | None = None, s: Session = Depends(get_session),

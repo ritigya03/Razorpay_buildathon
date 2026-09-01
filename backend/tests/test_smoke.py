@@ -1,6 +1,7 @@
 """End-to-end: boot the app, let the replay run, exercise the API + dispute loop."""
 from __future__ import annotations
 
+import json
 import time
 
 from fastapi.testclient import TestClient
@@ -93,6 +94,28 @@ def test_live_razorpay_ring_and_dispute():
         # money loop closes on a flagged live payment in a flagged ring
         disp = client.post("/api/simulate/dispute", json={}).json()
         assert disp["was_flagged"] is True and disp["ring_id"] is not None
+
+
+def test_federated_live_detection():
+    """The live federated protocol over Razorpay payments: per-merchant salted-
+    HMAC sketches -> Merkle root -> aggregate -> flag a cross-merchant ring,
+    with nothing raw leaving a node."""
+    with TestClient(app) as client:
+        client.post("/api/demo/scenario", json={"kind": "shared_card", "size": 4})
+        d = client.post("/api/fl/detect-live", json={"epsilon": None}).json()
+
+        assert len(d["merkle_root"]) == 64
+        assert d["merchant_sketches"], "expected per-merchant sketches"
+        blob = json.dumps(d["merchant_sketches"])
+        assert "last4" not in blob and "@" not in blob  # no raw card / email leaked
+
+        fed = [r for r in d["federated_rings"] if r["flagged"]]
+        assert fed and fed[0]["merchants"] >= 2
+        assert d["flagged_federated"] >= 1 and d["flagged_centralized"] >= 1
+
+        # DP variant still returns a well-formed result
+        dp = client.post("/api/fl/detect-live", json={"epsilon": 8}).json()
+        assert dp["epsilon"] == 8.0 and len(dp["merkle_root"]) == 64
 
 
 def test_orders_endpoint_requires_keys():

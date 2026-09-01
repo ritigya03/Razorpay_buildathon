@@ -207,16 +207,19 @@ accounts / 17 cards / 19 fraud.
   ring-F1. "Fraud ring" (recall denominator) = ≥ 2 fraudulent transactions.
 - Advisory only — a flagged ring is a review item + forensic summary.
 
-**Held-out test result:**
+**Held-out test result** (current `report/ring_metrics.json`; the earlier draft
+of this table quoted 0.75/0.75 and 18,001→132 from a pre-Phase-3 baseline run —
+the Phase-3 refactor re-ran `make baseline` with `first_metric_only=True`,
+best_iter 609→1144, which shifted these slightly. The JSON is authoritative):
 
 | ring type | groups | fraud rings | flagged | precision | recall | F1 |
 |---|---|---|---|---|---|---|
-| device | 433 | 92 | 92 | **0.75** | **0.75** | **0.75** |
+| device | 433 | 92 | 104 | **0.72** | **0.82** | **0.77** |
 | address | 586 | 42 | 40 | 0.42 | 0.40 | 0.41 |
 
-- Alert-volume reduction: 18,001 transaction alerts → **132 ring alerts**
-  (≈ 136× fewer to review).
-- Fraud coverage: flagged rings hold 510 / 3,083 fraud txns (**16.5%** of all
+- Alert-volume reduction: 17,835 transaction alerts → **144 ring alerts**
+  (≈ 124× fewer to review).
+- Fraud coverage: flagged rings hold 539 / 3,083 fraud txns (**17.5%** of all
   fraud) — the coordinated slice. Only ~24% of transactions carry device data;
   most fraud is single-account. Ceiling stated openly.
 - A few frauds are caught only because their ring was flagged (own score below
@@ -224,7 +227,7 @@ accounts / 17 cards / 19 fraud.
 
 **Reading:** transaction model handles fraud broadly (PR-AUC 0.55, recall 0.84
 at the cost-optimal point); the ring engine takes the coordinated slice and
-makes it triage-able at 0.75/0.75 with ~100× less review volume. Complementary;
+makes it triage-able at 0.72 / 0.82 with ~120× less review volume. Complementary;
 both measured on unseen data.
 
 ---
@@ -660,3 +663,116 @@ LightGBM (~430). Graded accuracy (PR-AUC 0.546, ring 0.72–0.82) is the replay,
 not the live payments. The Razorpay demo proves the pipeline runs end-to-end on
 real payments and shows the *cross-merchant* pattern — it is a lighter detector
 than the graded one, stated plainly.
+
+---
+
+## Phase 8 — federated cross-merchant ring detection (2026-09-01)
+
+**Why:** the pitch (`project_sentinel.md`) is *"cross-merchant fraud-ring
+intelligence through Federated Learning and Differential Privacy."* Through
+Phase 7 the ring engine was 100 % centralised and Phase 4 FL was a separate
+classifier experiment — the build did not match the claim. Phase 8 builds the
+thing the pitch describes and **measures it against the centralised version**
+(which stays, for the comparison).
+
+### Design (locked with the user)
+
+- Detect cross-merchant rings *without any merchant sharing raw transactions*.
+- Keep the centralised ring detector alongside as the "sees everything" oracle.
+- **Hold the per-transaction score fixed** (Phase-1 LightGBM) across both arms,
+  so the comparison isolates the cost of federating the *ring layer* — the
+  score-model FL cost is Phase 4's job and the two compose.
+- Report whatever the numbers are.
+
+### What's built
+
+- `train/fl_crypto.py` — dependency-free primitives (imports from core `.venv`
+  *and* the backend): SHA-256 commit, Merkle root, salted-HMAC fingerprint,
+  Gaussian-mechanism `DPHistogram` (per-fingerprint **risk-bucket count vector**;
+  one txn → one bucket → L2 sensitivity 1 → one σ, no budget split), bucketize /
+  risk-estimate helpers.
+- `train/fl_rings.py` → `report/fl_ring_metrics.json` (`make fl-rings`, core
+  `.venv`, seed 42). 8 synthetic merchants (`hash(card1) % 8`). Entity = device
+  or address fingerprint (cards can't span merchants on this partition — they
+  hash to one merchant; devices/addresses can, and the concept doc names device
+  fingerprints anyway). Each merchant releases, per salted-HMAC fingerprint, a
+  DP-noised risk-bucket vector; commit/reveal + Merkle root; robust aggregator
+  rejects volume / risk-estimate outliers and commitment mismatches; summed
+  vectors flagged with the **same rule** as the centralised oracle. ε sweep
+  (5 noise draws averaged per ε, threshold re-calibrated on val per ε), one
+  malicious merchant (hot-flood + commit-mismatch).
+- `backend/app/fl_live.py` + `POST /api/fl/detect-live` — the runtime protocol
+  over the live Razorpay payments (entity = card fingerprint, which *does* span
+  merchants live). Returns the per-merchant HMAC sketches, the Merkle root, the
+  aggregated cross-merchant rings, and a centralised pass alongside. Optional
+  `epsilon` adds DP noise.
+- `GET /api/fl-ring-report`; `FederatedRings.tsx` — a Phase-8 section stacked
+  above the Phase-4 panels in the Federated tab (centralised vs federated bars,
+  the DP ε→F1 curve, the poison before/after, and a "run it live" panel that
+  shows the merchant sketches → Merkle root → emerged cross-merchant ring).
+
+### Dead end 1 — the first mechanism (count + risk-sum) inverted the DP curve
+
+v1 released `(count, risk_sum)` per fingerprint and the aggregator computed
+`mean = risk_sum / count`. Under DP the two are noised independently, so a
+count that noised *down* while the sum held inflated the mean → more fingerprints
+crossed the threshold → **recall went UP and precision collapsed as ε shrank**
+(ε=8 gave P 0.17 / R 0.85). Wrong shape entirely. Fix: release a **risk-bucket
+count vector** (each txn lands in exactly one bucket, sensitivity 1) and estimate
+mean risk as the bucket-midpoint weighted mean — bounded, and degrades
+gracefully. Also: re-calibrate the detector threshold on *validation with the
+same noise* for each ε (standard for DP eval; val only).
+
+### Dead end 2 — `hot` threshold too loose
+
+Second cut used a single "hot" count where hot = score ≥ the cost-optimal
+operating point (~0.012 — flags ~20 % of *all* transactions). `hot_frac` barely
+separated rings from legit shared devices → centralised F1 only 0.41. The
+5-bucket vector (above) restored discrimination → F1 0.67.
+
+### Dead end 3 — robust filter rejected an honest merchant
+
+`NORM_RATIO = 3` on per-merchant reported volume rejected honest merchant 3
+(3.14× the median — merchant volumes are genuinely non-IID). Raised to 5.0:
+catches only gross volume inflation, no honest false rejects; the hot-flood
+attack is caught by the *risk-estimate* outlier test anyway (it moves bucket
+mass, not volume).
+
+### Results (held-out test, combined device + address; reproducible)
+
+118 cross-merchant fraud rings (83 device + 35 address); 20 single-merchant.
+
+| detector | P | R | F1 |
+|---|---|---|---|
+| centralised (sees every txn) | 0.68 | 0.66 | 0.67 |
+| federated, **no DP** | 0.68 | 0.66 | 0.67 |
+
+**Identical — 78 TP / 36 FP / 40 FN in both. Federating the computation is free.**
+
+DP ε sweep: ∞ → **0.67**, ε=32 → 0.66, ε=16 → 0.43, ε=8 → 0.39, ε=4 → 0.32,
+ε=2 → 0.22, ε=1 → 0.08. Free to ε ≈ 32; below ε ≈ 16 the ~1-txn-per-merchant
+contributions to small rings fall below the Gaussian noise floor. An honest cost
+at *this* data scale — it shrinks as per-merchant volume grows (Vulcan scale
+would push the knee far below ε=1). Reported as a cost, not spun.
+
+Poison (1 of 8 malicious): hot-flood no-defense F1 **0.34** → robust aggregator
+**0.61** (merchant 0 rejected every run as a risk-estimate outlier);
+commit-mismatch caught by the SHA-256 digest check. Merkle root logged.
+
+### Honest limitations (also in `report/PHASE8.md`)
+
+Synthetic merchants; scorer is centralised LightGBM held fixed (a fully federated
+stack scores with the Phase-4 MLP — costs compose); DP-noised histogram sharing
+is a simplified stand-in for a real PSI / secure-aggregation protocol; silent
+(non-participation) poisoning is an incentive problem, not an aggregation one;
+device data on only ~24 % of txns caps recall for any fingerprint-based detector.
+
+### Verified
+
+`make fl-rings` reproducible (two runs identical). `make test` 5/5 (added
+`test_federated_live_detection` — sketches carry no raw card/email, a
+cross-merchant ring is flagged, DP variant well-formed). `npm run build` clean
+(579 kB / 166 kB gzip). Playwright: Federated tab renders the Phase-8 panels
+above the Phase-4 ones; "run federated detection" over a seeded shared-card
+scenario shows 3 merchant sketches → Merkle root → one flagged cross-merchant
+ring (`ddee6c51e8f2…`, 5 payments, 3 merchants, risk 0.62); zero console errors.

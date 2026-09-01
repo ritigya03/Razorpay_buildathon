@@ -8,6 +8,7 @@ import { Rings } from "./components/Rings";
 import { Disputes } from "./components/Disputes";
 import { Metrics } from "./components/Metrics";
 import { Federated } from "./components/Federated";
+import { FederatedRings } from "./components/FederatedRings";
 import { Agent } from "./components/Agent";
 import { RazorpayPanel } from "./components/Razorpay";
 
@@ -88,7 +89,7 @@ export default function App() {
           {tab === "Rings" && <Rings />}
           {tab === "Disputes" && <Disputes stats={stats} />}
           {tab === "Metrics" && <Metrics />}
-          {tab === "Federated" && <Federated />}
+          {tab === "Federated" && <><FederatedRings /><Federated /></>}
           {tab === "Agent" && <Agent />}
           {tab === "Razorpay" && <RazorpayPanel keyId={health?.razorpay_key_id ?? null} />}
         </div>

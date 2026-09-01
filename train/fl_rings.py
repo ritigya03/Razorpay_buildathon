@@ -57,7 +57,8 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import load_splits, prepare_features  # noqa: E402
 from fl_crypto import (  # noqa: E402
-    DPHistogram, commit_histogram, fingerprint_hmac, merkle_root,
+    BUCKET_EDGES, BUCKET_MID, DPHistogram, N_BUCKETS, bucketize,
+    commit_histogram, fingerprint_hmac, merkle_root, risk_estimate,
 )
 from ring_features import _add_keys  # noqa: E402
 from ring_engine import _specific_device  # noqa: E402
@@ -80,13 +81,10 @@ N_DP_REPEATS = 5        # average metrics over this many independent noise draws
 
 # risk buckets each merchant sorts its own transactions into (by the shared
 # scorer). One txn -> exactly one bucket, so the vector has DP sensitivity 1.
-BUCKET_EDGES = np.array([0.0, 0.2, 0.4, 0.6, 0.8, 1.01])
-BUCKET_MID = np.array([0.1, 0.3, 0.5, 0.7, 0.9])            # for the risk estimate
-N_BUCKETS = len(BUCKET_MID)
-
-
-def _bucketize(scores: np.ndarray) -> np.ndarray:
-    return np.clip(np.digitize(scores, BUCKET_EDGES) - 1, 0, N_BUCKETS - 1)
+# Bucket edges / midpoints / helpers live in fl_crypto (shared with the live
+# detector). Local aliases keep the rest of this file terse.
+_bucketize = bucketize
+_risk_estimate = risk_estimate
 
 
 # --------------------------------------------------------------------------- #
@@ -114,13 +112,6 @@ def _prep(df: pd.DataFrame, scores: np.ndarray) -> pd.DataFrame:
 # --------------------------------------------------------------------------- #
 # ground truth + centralised aggregation (exact, from pooled data)
 # --------------------------------------------------------------------------- #
-def _risk_estimate(bucket_matrix: np.ndarray) -> np.ndarray:
-    """Weighted mean of bucket midpoints -> a bounded estimate of mean risk.
-    bucket_matrix: (n_fingerprints, N_BUCKETS)."""
-    tot = bucket_matrix.sum(axis=1)
-    return (bucket_matrix @ BUCKET_MID) / np.maximum(tot, 1)
-
-
 def _exact_stats(f: pd.DataFrame, fp_col: str) -> pd.DataFrame:
     d = f[f[fp_col].notna()].copy()
     d["_h"] = d[fp_col].map(lambda x: fingerprint_hmac(SALT, str(x)))  # match the federated ids

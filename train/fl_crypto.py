@@ -45,6 +45,24 @@ def fingerprint_hmac(salt: bytes, value: str) -> str:
     return hmac.new(salt, value.encode(), hashlib.sha256).hexdigest()[:16]
 
 
+# --- risk bucketing (shared by the offline experiment and the live detector) --
+BUCKET_EDGES = np.array([0.0, 0.2, 0.4, 0.6, 0.8, 1.01])
+BUCKET_MID = np.array([0.1, 0.3, 0.5, 0.7, 0.9])
+N_BUCKETS = len(BUCKET_MID)
+
+
+def bucketize(scores) -> np.ndarray:
+    """Map risk scores in [0,1] to bucket indices [0, N_BUCKETS)."""
+    return np.clip(np.digitize(np.asarray(scores), BUCKET_EDGES) - 1, 0, N_BUCKETS - 1)
+
+
+def risk_estimate(bucket_matrix: np.ndarray) -> np.ndarray:
+    """Bucket-midpoint weighted mean -> bounded estimate of mean risk.
+    bucket_matrix: (n, N_BUCKETS)."""
+    m = np.atleast_2d(bucket_matrix).astype(float)
+    return (m @ BUCKET_MID) / np.maximum(m.sum(axis=1), 1)
+
+
 def gaussian_sigma(epsilon: float, delta: float, sensitivity: float) -> float:
     """Std-dev of the Gaussian mechanism for one (epsilon, delta) release of a
     query with the given L2 sensitivity. epsilon<=0 or inf -> 0 (no noise)."""
