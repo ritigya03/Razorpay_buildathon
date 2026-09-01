@@ -128,6 +128,8 @@ def _ring_row(rank: int, r: Ring) -> dict:
     return {
         "rank": rank, "ring_key": f"{r.kind}|{r.key}", "kind": r.kind,
         "fingerprint": r.key,
+        "source": r.source,                      # "replay" (held-out) | "razorpay" (live) | "mixed"
+        "merchants_spanned": r.n_merchants,      # >1 = cross-merchant (razorpay)
         "transactions": r.size, "distinct_accounts": r.distinct_members,
         "distinct_cards": r.distinct_cards,
         "risk_mean": round(r.score_mean, 3), "risk_max": round(r.score_max, 3),
@@ -245,6 +247,14 @@ are known for the replay, so "lead time" and "flagged before the chargeback" \
 claims are backed by truth.
 - Real Razorpay test-mode disputes flow in alongside and act as ground-truth \
 labels for the money loop.
+- Some rings form from LIVE Razorpay test-mode payments (source="razorpay") \
+rather than the replay. A `card` ring = one card identity used across several \
+customer identities; an `address` ring on live data = one identity running \
+several cards (carding). When `merchants_spanned` > 1 the pattern crosses \
+merchants — a coordinated card no single merchant could see alone. Say so \
+explicitly: it is the core cross-merchant point. The live path is scored by a \
+lightweight rules model, not the graded LightGBM — note that when reporting on a \
+source="razorpay" ring.
 
 Addressing a ring: the ring engine rebuilds every tick, so numeric ring ids are \
 NOT stable. Identify a ring by its `rank` ("1" = highest risk) or its \

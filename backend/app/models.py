@@ -21,6 +21,8 @@ class Transaction(SQLModel, table=True):
     uid: str | None = Field(default=None, index=True)
     addr_key: str | None = Field(default=None, index=True)
 
+    merchant: str | None = Field(default=None, index=True)    # synthetic merchant tag (razorpay demo)
+
     score: float = Field(index=True)          # 0..1 advisory risk
     scorer: str                               # "model" | "rules"
     flagged: bool = Field(default=False, index=True)
@@ -35,11 +37,13 @@ class Transaction(SQLModel, table=True):
 
 class Ring(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    kind: str = Field(index=True)             # "device" | "address"
-    key: str = Field(index=True)              # the shared fingerprint / addr tuple
+    kind: str = Field(index=True)             # "device" | "address" | "card"
+    key: str = Field(index=True)              # the shared fingerprint / addr tuple / card identity
+    source: str = Field(default="replay", index=True)   # "replay" | "razorpay" | "mixed"
     size: int = 0
-    distinct_members: int = 0                 # distinct accounts (device) or cards (address)
+    distinct_members: int = 0                 # distinct accounts (device/card) or cards (address)
     distinct_cards: int = 0
+    n_merchants: int = 0                      # distinct merchant tags among members (razorpay)
     score_mean: float = 0.0
     score_max: float = 0.0
     amount_total: float = 0.0

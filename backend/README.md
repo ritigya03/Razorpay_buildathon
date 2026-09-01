@@ -51,7 +51,9 @@ to `payment.captured`, `payment.dispute.created/won/lost/closed`.
 | POST | `/api/orders` | create a test-mode Razorpay order (503 without keys) |
 | POST | `/api/verify` | verify a payment signature, ingest the payment |
 | POST | `/webhook/razorpay` | Razorpay webhook receiver (signature-checked) |
-| POST | `/api/simulate/dispute` | `{}` = auto-pick, or `{"txn_id": "..."}` |
+| POST | `/api/simulate/dispute` | `{}` = auto-pick (replay fraud, else flagged live payment), or `{"txn_id": "..."}` |
+| POST | `/api/demo/scenario` | `{"kind": "shared_card"\|"carding", "size": 4}` — seed a coordinated set of live-shaped payments |
+| GET | `/api/rings` | now also `?source=replay\|razorpay\|mixed` |
 | GET | `/api/agent/health` | Phase 5 agent status (`ok`, `model`, `error`) |
 | POST | `/api/agent/chat` | `{"message": "...", "session_id"?: "..."}` → risk-analyst reply + tool calls |
 | POST | `/api/agent/reset` | clear a chat session's history |
@@ -72,9 +74,9 @@ app/config.py         settings (env / backend/.env)
 app/models.py         Transaction, Ring, Dispute, Alert
 app/db.py             engine + session
 app/scoring.py        LightGBM model + feature spec (reuses train/common.py)
-app/rings.py          runtime ring engine (device / address rings, no union-find)
+app/rings.py          runtime ring engine (device / address / card rings, no union-find)
 app/replay.py         time-compressed replay of the held-out split
-app/rules.py          rules score for live Razorpay payments
+app/rules.py          rules score for live Razorpay payments (+ shared-entity velocity)
 app/razorpay_client.py order create + signature verification
 app/events.py         ingest payments / disputes, dispute simulation
 app/agent.py          Phase 5 risk-analyst agent (Gemini + read-only tools)

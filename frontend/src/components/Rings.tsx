@@ -27,7 +27,7 @@ function RingGraph({ ring, members }: { ring: Ring; members: Txn[] }) {
       })}
       <circle cx={cx} cy={cy} r={26} fill="var(--panel-2)" stroke="var(--accent)" strokeWidth={2} />
       <text x={cx} y={cy - 2} textAnchor="middle" fontSize={10} fill="var(--text)">
-        {ring.kind === "device" ? "device" : "addr"}
+        {ring.kind}
       </text>
       <text x={cx} y={cy + 10} textAnchor="middle" fontSize={9} fill="var(--muted)">
         {ring.distinct_cards} cards
@@ -75,11 +75,15 @@ export function Rings() {
             <div key={r.id} className="panel ring-card" style={{ margin: "8px 0", background: r.id === sel ? "var(--panel-2)" : undefined }}
                  onClick={() => setSel(r.id)}>
               <div className="ring-head">
-                <strong>#{r.id} · {r.kind}</strong>
+                <strong>
+                  #{r.id} · {r.kind}
+                  {r.source === "razorpay" && <span className="pill" style={{ marginLeft: 6 }}>live</span>}
+                  {r.n_merchants > 1 && <span className="pill" style={{ marginLeft: 4 }}>{r.n_merchants} merchants</span>}
+                </strong>
                 <span className={"risk " + (r.score_mean > 0.5 ? "hi" : "mid")}>{r.score_mean.toFixed(2)}</span>
               </div>
               <div className="muted" style={{ fontSize: 12 }}>
-                {r.size} txns · {r.distinct_members} accounts · {r.distinct_cards} cards
+                {r.size} txns · {r.distinct_members} {r.kind === "address" ? "identities" : "accounts"} · {r.distinct_cards} cards
                 {r.n_fraud > 0 && <> · <span style={{ color: "var(--fraud)" }}>{r.n_fraud} fraud</span></>}
                 {r.n_disputed > 0 && <> · <span style={{ color: "var(--ok)" }}>{r.n_disputed} disputed</span></>}
               </div>

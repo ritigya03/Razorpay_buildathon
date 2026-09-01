@@ -109,7 +109,7 @@ def list_transactions(
 
 @app.get("/api/rings")
 def list_rings(
-    flagged: bool | None = None, kind: str | None = None,
+    flagged: bool | None = None, kind: str | None = None, source: str | None = None,
     limit: int = 100, s: Session = Depends(get_session),
 ) -> list[Ring]:
     q = select(Ring).order_by(Ring.score_mean.desc()).limit(min(limit, 500))
@@ -117,6 +117,8 @@ def list_rings(
         q = q.where(Ring.flagged == flagged)
     if kind:
         q = q.where(Ring.kind == kind)
+    if source:
+        q = q.where(Ring.source == source)
     return s.exec(q).all()
 
 
@@ -269,6 +271,63 @@ def simulate_dispute(payload: dict = Body(default={}), s: Session = Depends(get_
     return {"dispute_id": disp.id, "payment_id": disp.payment_id,
             "was_flagged": disp.was_flagged, "lead_time_hours": disp.lead_time_hours,
             "ring_id": disp.ring_id}
+
+
+@app.post("/api/demo/scenario")
+def demo_scenario(payload: dict = Body(default={}), s: Session = Depends(get_session)) -> dict:
+    """Seed a coordinated set of *live-shaped* Razorpay payments so a ring forms
+    without doing N manual Checkout runs. Same code path as a real webhook
+    (ingest_payment -> rules score -> recompute_rings). For the demo / tests;
+    the real flow is the Razorpay tab's Checkout.
+    """
+    import time as _t
+    import uuid as _u
+    from .events import ingest_payment
+
+    kind = payload.get("kind", "shared_card")
+    merchants = payload.get("merchants") or ["Merchant A", "Merchant B", "Merchant C"]
+    size = max(2, min(int(payload.get("size", 3)), 8))
+    ident = [
+        ("aarav.demo@gmail.com", "9000000001"), ("isha.demo@outlook.com", "9000000002"),
+        ("kabir.demo@protonmail.com", "9000000003"), ("mira.demo@mail.com", "9000000004"),
+        ("veer.demo@aim.com", "9000000005"), ("nyra.demo@gmail.com", "9000000006"),
+        ("advait.demo@outlook.com", "9000000007"), ("saanvi.demo@gmail.com", "9000000008"),
+    ]
+    cards = [
+        {"last4": "1111", "network": "Visa", "issuer": "HDFC", "type": "credit"},
+        {"last4": "5100", "network": "MasterCard", "issuer": "SBI", "type": "credit"},
+        {"last4": "0005", "network": "Visa", "issuer": "ICICI", "type": "debit"},
+        {"last4": "4242", "network": "Visa", "issuer": "AXIS", "type": "prepaid"},
+        {"last4": "1881", "network": "RuPay", "issuer": "KOTAK", "type": "credit"},
+    ]
+    now = _t.time()
+    made: list[str] = []
+    for i in range(size):
+        if kind == "carding":                       # one identity, many cards, one merchant
+            email, contact = ident[0]
+            card = {**cards[i % len(cards)], "international": False}
+            merchant = merchants[0]
+        else:                                        # shared_card: one card, many identities/merchants
+            email, contact = ident[i % len(ident)]
+            card = {**cards[0], "international": bool(i % 2)}
+            merchant = merchants[i % len(merchants)]
+        entity = {
+            "id": f"pay_demo_{_u.uuid4().hex[:14]}", "amount": (150 + 70 * i) * 100,
+            "currency": "INR", "email": email, "contact": contact, "method": "card",
+            "card": card, "created_at": now - (size - i) * 45,
+            "notes": {"sentinel_merchant": merchant},
+        }
+        made.append(ingest_payment(s, entity, source="razorpay").id)
+
+    rings = s.exec(
+        select(Ring).where(Ring.source == "razorpay", Ring.flagged == True)  # noqa: E712
+        .order_by(Ring.score_mean.desc())
+    ).all()
+    return {"kind": kind, "payments": made,
+            "flagged_rings": [{"id": r.id, "kind": r.kind, "key": r.key,
+                               "accounts": r.distinct_members, "cards": r.distinct_cards,
+                               "merchants": r.n_merchants, "risk_mean": round(r.score_mean, 3)}
+                              for r in rings]}
 
 
 # --------------------------------------------------------------------------- #

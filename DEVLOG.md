@@ -591,3 +591,72 @@ coordinated-slice caveat, plus a drafted escalation note. `npm run build` clean
 markdown renderer in `Agent.tsx` avoids a new dep). Pre-existing
 `test_orders_endpoint_503_without_keys` still fails for the Phase-4 reason (real
 Razorpay keys in `backend/.env`), untouched by Phase 5.
+
+---
+
+## Phase 7 — live Razorpay detection path (2026-09-01)
+
+**Problem raised by the user:** with the IEEE replay as the backbone, the
+Razorpay tab was near-decoration — real webhook + a rules score on one payment,
+but the model never scored it and the ring engine never saw it (`ingest_payment`
+wrote `card_id=None, device_id=None, uid=None`). So "pay through Razorpay from
+multiple ids and detect fraud" didn't actually work.
+
+**Scope decision (locked with the user):** IEEE replay stays byte-for-byte
+unchanged (it's the graded path). The Razorpay path becomes a *second, lighter*
+detector on real payment fields. No device-fingerprint-via-notes — card + carding
+rings only, everything from real webhook fields.
+
+### What changed
+
+- **`ingest_payment`** now derives real identity from the payment entity:
+  `card_id = network|issuer|type|last4` (a real, non-unique card grouping key —
+  same spirit as IEEE's `_card_id` BIN tuple), account `uid = contact or email`,
+  and a `merchant` tag from order `notes.sentinel_merchant`. New
+  `Transaction.merchant` column; `Ring` gains `source` and `n_merchants`.
+- **`rules.py`** gains the shared-entity velocity signals that make a
+  coordinated pattern cross the flag line: "this card seen on N distinct
+  identities in the last hour" (+0.25…), "…at N merchants" (+0.15,
+  cross-merchant), "this identity used N distinct cards" (+0.25…, carding).
+  Isolated payments stay at base ~0.05.
+- **`recompute_rings`** adds a **`card` ring rule scoped to `source="razorpay"`**
+  (one card → ≥2 customer identities). Scoped to live rows so the replay's
+  BIN-tuple `card_id` — shared by thousands — can't recreate the Phase-2b
+  mega-blob. Replay device/address rings unchanged. Carding surfaces as an
+  `address` ring on live rows (same `rzp|dom|contact`, ≥2 distinct cards).
+- **`simulate_dispute_auto`** falls back to a flagged live payment in a flagged
+  ring, so "dispute the one I just made" closes the loop (lead time is real but
+  small — the payment came in seconds ago).
+- **`POST /api/demo/scenario`** (`kind: shared_card | carding`) seeds a
+  coordinated set through the *same* `ingest_payment` path — for tests and as a
+  stage fallback when N manual Checkout runs aren't practical. The real flow is
+  the Razorpay tab's Checkout.
+- **Frontend Razorpay tab** rebuilt: merchant selector (A/B/C), 3 customer
+  identity presets that prefill Checkout, `notes.sentinel_merchant` on the order,
+  a "rings from live payments" panel (card/address rings with an `N merchants`
+  badge), and the two seed buttons. Rings tab shows a `live` / `N merchants`
+  badge on `source="razorpay"` rings.
+- **Agent**: `_ring_row` carries `source` + `merchants_spanned`; system brief
+  tells it to call out cross-merchant live rings explicitly and to note the live
+  path uses the rules model, not the graded LightGBM.
+
+### Verified
+
+`make test` green (4/4). Replaced the always-failing
+`test_orders_endpoint_503_without_keys` with `test_orders_endpoint_requires_keys`
+(asserts the behaviour that holds given whatever's in `backend/.env`). New
+`test_live_razorpay_ring_and_dispute`: `shared_card` scenario → flagged `card`
+ring, 4 identities / 1 card / ≥2 merchants; `carding` → flagged `address` ring
+with ≥3 cards; dispute closes on a flagged live payment. Playwright: seeded both
+scenarios, Razorpay tab shows `#N · card [3 merchants] flagged risk 0.62` over
+`Visa|HDFC|credit|last4:1111` and `#N · address flagged` over
+`rzp|gmail.com|9000000001`; zero console errors; `npm run build` clean
+(571 kB / 164 kB gzip).
+
+### Honest note for the pitch
+
+The live path is a **rules scorer** (a handful of features), not the graded
+LightGBM (~430). Graded accuracy (PR-AUC 0.546, ring 0.72–0.82) is the replay,
+not the live payments. The Razorpay demo proves the pipeline runs end-to-end on
+real payments and shows the *cross-merchant* pattern — it is a lighter detector
+than the graded one, stated plainly.

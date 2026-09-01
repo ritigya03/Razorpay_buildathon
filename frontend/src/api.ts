@@ -19,14 +19,15 @@ export interface Stats {
 export interface Txn {
   id: string; source: string; ts: number; amount: number;
   email_domain: string | null; card_id: string | null; device_id: string | null;
-  uid: string | null; score: number; scorer: string; flagged: boolean;
+  uid: string | null; merchant: string | null;
+  score: number; scorer: string; flagged: boolean;
   ring_id: number | null; is_fraud: number | null;
   disputed: boolean; dispute_outcome: string | null;
 }
 
 export interface Ring {
-  id: number; kind: string; key: string; size: number;
-  distinct_members: number; distinct_cards: number;
+  id: number; kind: string; key: string; source: string; size: number;
+  distinct_members: number; distinct_cards: number; n_merchants: number;
   score_mean: number; score_max: number; amount_total: number;
   first_ts: number; last_ts: number; flagged: boolean;
   n_fraud: number; n_disputed: number;
@@ -69,10 +70,15 @@ export const api = {
       method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify(txn_id ? { txn_id } : {}),
     }).then(j),
-  createOrder: (amount_paise: number) =>
+  createOrder: (amount_paise: number, notes?: Record<string, string>) =>
     fetch("/api/orders", {
       method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ amount_paise, receipt: "sentinel_demo" }),
+      body: JSON.stringify({ amount_paise, receipt: "sentinel_demo", notes }),
+    }).then(j),
+  demoScenario: (kind: "shared_card" | "carding", size = 4) =>
+    fetch("/api/demo/scenario", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ kind, size }),
     }).then(j),
 
   agentHealth: (): Promise<AgentHealth> => fetch("/api/agent/health").then(j),

@@ -58,6 +58,16 @@ closes the money loop — it disputes a flagged fraudulent transaction and repor
 how many hours earlier Sentinel flagged it (~40h in a typical run).
 `make backend` runs it; `make test` runs the end-to-end pipeline test.
 
+**Live Razorpay detection (Phase 7).** Real test-mode payments are grouped by a
+real card identity (`network|issuer|type|last4`), customer identity (`contact`),
+and a merchant tag (order `notes`). Pay with the same card from several customer
+identities → a **card ring** forms across merchants (the cross-merchant pattern
+no single merchant sees); same identity, several cards → a **carding ring**. The
+live path is scored by a lightweight rules model (`app/rules.py`) with
+shared-entity velocity signals, *not* the graded LightGBM — so the graded numbers
+below come from the replay, not live payments. `POST /api/demo/scenario`
+(`shared_card` / `carding`) seeds a coordinated set through the same ingest path.
+
 ### Phase 6 — dashboard ([frontend/README.md](frontend/README.md))
 
 React + Vite. Eight tabs: Overview (replay + live metrics), Feed (transaction

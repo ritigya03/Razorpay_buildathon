@@ -60,19 +60,31 @@ def recompute_rings(session: Session, window_start_ts: float) -> list[Ring]:
             groups.setdefault(("device", t.device_id), []).append(t)
         if t.addr_key:
             groups.setdefault(("address", t.addr_key), []).append(t)
+        # card rings: one card identity across several customer identities.
+        # Live Razorpay rows only — the replay's card_id is a BIN/type tuple
+        # shared by thousands of unrelated cards (see DEVLOG Phase 2b blob).
+        if t.source == "razorpay" and t.card_id:
+            groups.setdefault(("card", t.card_id), []).append(t)
+
+    # distinct-member count: accounts for device/card rings, cards for address rings
+    def member_key(kind):
+        return (lambda x: x.card_id) if kind == "address" else (lambda x: x.uid)
 
     newly_flagged: list[Ring] = []
     for (kind, key), members in groups.items():
-        member_field = (lambda x: x.uid) if kind == "device" else (lambda x: x.card_id)
+        member_field = member_key(kind)
         distinct_members = len({member_field(m) for m in members if member_field(m)})
         if not (2 <= distinct_members <= settings.ring_cap):
             continue
         scores = [m.score for m in members]
         mean_s = sum(scores) / len(scores)
+        srcs = {m.source for m in members}
         ring = Ring(
             kind=kind, key=key, size=len(members),
+            source=(srcs.pop() if len(srcs) == 1 else "mixed"),
             distinct_members=distinct_members,
             distinct_cards=len({m.card_id for m in members if m.card_id}),
+            n_merchants=len({m.merchant for m in members if m.merchant}),
             score_mean=mean_s, score_max=max(scores),
             amount_total=sum(m.amount for m in members),
             first_ts=min(m.ts for m in members), last_ts=max(m.ts for m in members),
