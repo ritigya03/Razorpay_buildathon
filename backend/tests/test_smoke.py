@@ -60,6 +60,9 @@ def test_replay_pipeline_and_dispute_loop():
         assert det.get("members") and det["rank"] == 1
         assert agent_mod.get_ring_detail("999999").get("error")  # bad ref -> clean error
 
+        fed = agent_mod.get_federated_report()
+        assert "error" in fed or "phase8_federated_ring_detection" in fed
+
 
 def test_agent_health_and_input_validation():
     with TestClient(app) as client:

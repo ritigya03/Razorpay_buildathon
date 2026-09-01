@@ -155,12 +155,14 @@ pass alongside.
 ### Phase 5 — risk-analyst agent ([backend/app/agent.py](backend/app/agent.py))
 
 A conversational layer over the same event store the dashboard reads. The agent
-has **four read-only tools** — situation summary, flagged-ring list, ring
-detail, recent disputes — and no write tools; it grounds every number in a tool
-call and turns the technical state into a briefing, a forensic report, or a
-draft escalation note a human reviewer can act on. Rings churn ids on every
-replay tick, so it addresses a ring by **rank** ("1" = highest risk) or by its
-stable **`kind|key`** fingerprint.
+has **five read-only tools** — situation summary, flagged-ring list, ring
+detail, recent disputes, and the federated report (Phase 4 + 8) — and no write
+tools; it grounds every number in a tool call and turns the technical state into
+a briefing, a forensic report, or a draft escalation note a human reviewer can
+act on. Rings churn ids on every replay tick, so it addresses a ring by **rank**
+("1" = highest risk) or by its stable **`kind|key`** fingerprint. It knows the
+live feed is the *centralized* baseline and points at the Phase-8 federated
+experiment when asked about privacy / federated learning.
 
 Runs inside the Phase-3 backend (`POST /api/agent/chat`, `GET /api/agent/health`),
 surfaced as the dashboard's **Agent** tab. Powered by **Google Gemini**

@@ -776,3 +776,16 @@ cross-merchant ring is flagged, DP variant well-formed). `npm run build` clean
 above the Phase-4 ones; "run federated detection" over a seeded shared-card
 scenario shows 3 merchant sketches → Merkle root → one flagged cross-merchant
 ring (`ddee6c51e8f2…`, 5 payments, 3 merchants, risk 0.62); zero console errors.
+
+### Follow-up — the agent contradicted the pitch
+
+Asked "what is federated learning doing", the Phase-5 agent answered *"Federated
+Learning is not currently active"* — correct about what its four tools could see
+(they only read the centralised SQLite store), wrong about the project. Added a
+fifth tool `get_federated_report` (reads `fl_ring_metrics.json` + `fl_metrics.json`,
+404-safe) and rewrote the system brief so the agent knows the live feed is the
+*centralised baseline* that Phase 8 is measured against. Re-tested live: it now
+calls the tool and explains Phase 8 (federated == centralised at F1 0.67 no DP,
+DP cost below ε≈16, poison caught) and Phase 4 (federated classifier), and
+answers "is raw merchant data visible" correctly (centralised: yes; federated
+Phase 4/8: only weights / DP-noised hashed histograms leave a node).

@@ -231,7 +231,69 @@ def get_recent_disputes(limit: int = 10) -> dict:
             "_summary": f"returned {len(rows)} disputes"}
 
 
-TOOLS = [get_situation_summary, list_flagged_rings, get_ring_detail, get_recent_disputes]
+@_tool
+def get_federated_report() -> dict:
+    """The federated-learning results (Phase 4 + Phase 8). The replay / live feed
+    you see through the other tools is the CENTRALISED baseline; this tool
+    reports the separate experiments that federate the pipeline so no merchant
+    shares raw data. Call this whenever asked what federated learning is doing,
+    or for the privacy story. Takes no arguments. 404-safe: returns an "error"
+    field if the reports haven't been generated."""
+    import json
+
+    base = settings.metrics_file.parent
+    out: dict = {}
+
+    p8 = base / "fl_ring_metrics.json"
+    if p8.exists():
+        d = json.loads(p8.read_text())
+        gt = d["ground_truth"]
+        sweep = {r["epsilon"]: r["combined"]["f1"] for r in d["dp_sweep"] if r["epsilon"]}
+        out["phase8_federated_ring_detection"] = {
+            "what": "8 merchants each release only DP-noised salted-HMAC risk-bucket "
+                    "histograms; the aggregator sums them to flag cross-merchant rings. "
+                    "Commit/reveal + Merkle root + robust aggregation. Same LightGBM "
+                    "per-transaction score as the centralised arm, held fixed.",
+            "cross_merchant_fraud_rings_in_test": (
+                gt["device"]["cross_merchant_fraud_rings"]
+                + gt["address"]["cross_merchant_fraud_rings"]),
+            "centralised_f1": d["centralized"]["combined"]["f1"],
+            "federated_no_dp_f1": d["federated_no_dp"]["combined"]["f1"],
+            "identical_no_dp": (d["centralized"]["combined"]["f1"]
+                                == d["federated_no_dp"]["combined"]["f1"]),
+            "dp_sweep_f1_by_epsilon": sweep,
+            "poison_hot_flood_f1": {
+                "no_defense": d["poison_demo"]["hot_flood_no_defense"]["combined"]["f1"],
+                "defended": d["poison_demo"]["hot_flood_defended"]["combined"]["f1"],
+            },
+            "merkle_root": d["federated_no_dp"]["merkle_root"],
+        }
+
+    p4 = base / "fl_metrics.json"
+    if p4.exists():
+        d = json.loads(p4.read_text())
+        try:
+            eps2 = next(x for x in d["dp_sweep"] if x.get("target_epsilon") == 2)
+        except (StopIteration, KeyError):
+            eps2 = None
+        out["phase4_federated_classifier"] = {
+            "what": "8 merchants train a local MLP; FedAvg aggregates the weights "
+                    "(not raw data) with Opacus DP-SGD, commit/reveal, poison filter.",
+            "centralised_pr_auc": d["centralized"]["pr_auc"],
+            "federated_no_dp_pr_auc": d["federated_no_dp"]["pr_auc"],
+            "federated_dp_eps2_pr_auc": eps2["pr_auc"] if eps2 else None,
+            "note": d["meta"].get("disclaimer", ""),
+        }
+
+    if not out:
+        return {"error": "federated reports not generated — run `make fl-rings` (and `make fl`)",
+                "_summary": "no federated report on disk"}
+    out["_summary"] = "federated report (Phase 4 classifier + Phase 8 ring detection)"
+    return out
+
+
+TOOLS = [get_situation_summary, list_flagged_rings, get_ring_detail,
+         get_recent_disputes, get_federated_report]
 
 SYSTEM_BRIEF = """\
 You are the risk-analyst assistant inside Project Sentinel, an advisory system \
@@ -239,14 +301,27 @@ that detects COORDINATED fraud rings — one actor spreading many small \
 transactions across cards, devices and merchants so no single merchant sees \
 enough to react.
 
-What you are looking at:
+What you are looking at (this is the CENTRALISED baseline):
 - A time-compressed replay of a held-out temporal test set (the final 15% of \
 the timeline, never seen in training). Every transaction is scored by the real \
-LightGBM model and grouped by the real ring engine. Ground-truth fraud labels \
-are known for the replay, so "lead time" and "flagged before the chargeback" \
-claims are backed by truth.
+LightGBM model and grouped by the real ring engine, all in one place. \
+Ground-truth fraud labels are known for the replay, so "lead time" and "flagged \
+before the chargeback" claims are backed by truth.
 - Real Razorpay test-mode disputes flow in alongside and act as ground-truth \
 labels for the money loop.
+
+Federated learning is SEPARATE from the feed above and you only see it through \
+get_federated_report. Two experiments federate the pipeline so no merchant \
+shares raw data: Phase 4 federates the *classifier* (merchants share model \
+weights, not rows; FedAvg + DP-SGD), Phase 8 federates the *ring detection* \
+(merchants share only DP-noised hashed histograms; the aggregator sums them to \
+find cross-merchant rings). With no DP noise the federated ring detector is \
+IDENTICAL to the centralised one (additive histograms decompose losslessly over \
+the merchant partition) — that is the point, not a bug. DP adds a real cost \
+below epsilon ~= 16, and a poisoned merchant is caught and recovered. If asked \
+"what is federated learning doing", call get_federated_report and explain that \
+the feed you monitor is the centralised baseline that Phase 8 is measured \
+against — do NOT say federated learning is inactive.
 - Some rings form from LIVE Razorpay test-mode payments (source="razorpay") \
 rather than the replay. A `card` ring = one card identity used across several \
 customer identities; an `address` ring on live data = one identity running \
@@ -276,6 +351,11 @@ covers the coordinated slice — ~16% of all fraud; device data is present on \
 ~24% of transactions), (4) recommended next step.
 - "Mitigation" / "escalation note" -> call get_ring_detail(...), then draft a \
 short note (5-8 lines) a risk manager could send to the merchant / issuer.
+- "What is federated learning doing" / privacy story -> call \
+get_federated_report and summarise Phase 8 (federated == centralised ring \
+detection at F1 with no DP; DP cost below epsilon ~= 16; poison caught) and \
+Phase 4 (federated classifier ~= centralised). Make clear the live feed is the \
+centralised baseline for that comparison.
 
 Hard rules:
 - Sentinel is ADVISORY. Never recommend automatic blocking. Recommend human \

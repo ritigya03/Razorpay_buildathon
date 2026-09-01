@@ -55,7 +55,7 @@ to `payment.captured`, `payment.dispute.created/won/lost/closed`.
 | POST | `/api/demo/scenario` | `{"kind": "shared_card"\|"carding", "size": 4}` — seed a coordinated set of live-shaped payments |
 | GET | `/api/rings` | now also `?source=replay\|razorpay\|mixed` |
 | GET | `/api/agent/health` | Phase 5 agent status (`ok`, `model`, `error`) |
-| POST | `/api/agent/chat` | `{"message": "...", "session_id"?: "..."}` → risk-analyst reply + tool calls |
+| POST | `/api/agent/chat` | `{"message": "...", "session_id"?: "..."}` → risk-analyst reply + tool calls (5 read-only tools incl. the federated report) |
 | POST | `/api/agent/reset` | clear a chat session's history |
 | GET | `/api/fl-ring-report` | Phase 8 federated-vs-centralized ring metrics (404 until `make fl-rings`) |
 | POST | `/api/fl/detect-live` | Phase 8 runtime protocol over the live payments; optional `{"epsilon": <float>}` |
