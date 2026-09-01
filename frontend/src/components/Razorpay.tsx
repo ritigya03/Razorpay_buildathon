@@ -52,7 +52,7 @@ export function RazorpayPanel({ keyId }: { keyId: string | null }) {
               payment: {
                 id: resp.razorpay_payment_id, amount: amount * 100, method: "card",
                 email: ident.email, contact: ident.contact,
-                card: { last4: "1111", network: "Visa", type: "credit", international: false },
+                card: { last4: "5449", network: "MasterCard", type: "credit", issuer: "HDFC", international: false },
                 notes: { sentinel_merchant: merchant },
               },
             });
@@ -115,7 +115,8 @@ export function RazorpayPanel({ keyId }: { keyId: string | null }) {
           <button className="primary" onClick={pay} disabled={!keyId}>create order &amp; pay</button>
         </div>
         <div className="muted" style={{ fontSize: 12 }}>
-          test card 4111 1111 1111 1111 · any future expiry / CVV · OTP 1111.
+          domestic test card 5267 3181 8797 5449 · any future expiry / CVV · OTP 1111
+          (4111… is treated as international and rejected in test mode).
         </div>
 
         <div className="row" style={{ gap: 6, marginTop: 12, borderTop: "1px solid var(--border-2)", paddingTop: 10 }}>
