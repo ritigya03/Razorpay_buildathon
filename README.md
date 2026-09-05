@@ -1,4 +1,4 @@
-# Project Sentinel
+# Sentinel
 
 Sentinel catches **coordinated fraud rings**: cases where one person or group
 spreads many small transactions across different cards, devices, and merchants
