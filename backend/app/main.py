@@ -5,6 +5,7 @@ the real model + ring engine, plus live Razorpay test-mode payments/disputes.
 """
 from __future__ import annotations
 
+import asyncio
 import json
 from contextlib import asynccontextmanager
 
@@ -25,13 +26,23 @@ from .replay import replay
 from .scoring import scorer
 
 
+async def _boot_replay() -> None:
+    # replay.load() streams + scores ~88k rows (real I/O + LightGBM predicts) —
+    # seconds locally, potentially over a minute on a slower/shared deploy CPU.
+    # Running it here, off the startup path, means the port opens immediately
+    # and a cold start never looks like a dead service to Render's port scan
+    # (or to a browser) while it's still loading; /api/stats just reports
+    # loaded=false with a progress bar until this finishes.
+    await asyncio.to_thread(replay.load)
+    replay.reset()   # each service start = a clean replay from day 0
+    replay.start()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
     if settings.replay_autostart and scorer.ok:
-        replay.load()
-        replay.reset()   # each service start = a clean replay from day 0
-        replay.start()
+        asyncio.create_task(_boot_replay())
     yield
     replay.pause()
 
