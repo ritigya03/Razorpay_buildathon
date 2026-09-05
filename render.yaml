@@ -1,0 +1,26 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# In the Render dashboard: New + -> Blueprint -> connect this repo. Render reads
+# this file, builds the Dockerfile, and prompts once for the secret values below
+# (marked sync: false) instead of ever storing them in the repo.
+services:
+  - type: web
+    name: project-sentinel
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: SENTINEL_RAZORPAY_KEY_ID
+        sync: false
+      - key: SENTINEL_RAZORPAY_KEY_SECRET
+        sync: false
+      - key: SENTINEL_RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: SENTINEL_GEMINI_API_KEY
+        sync: false
+      - key: SENTINEL_GEMINI_MODEL
+        value: gemini-3.1-flash-lite
+      - key: SENTINEL_REPLAY_DAYS_PER_SEC
+        value: "2.0"
+      - key: SENTINEL_REPLAY_AUTOSTART
+        value: "true"

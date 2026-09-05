@@ -380,3 +380,18 @@ def agent_chat(payload: dict = Body(...)) -> dict:
 def agent_reset(payload: dict = Body(default={})) -> dict:
     agent.reset(str(payload.get("session_id") or "default"))
     return {"ok": True}
+
+
+# --------------------------------------------------------------------------- #
+# Serve the built dashboard (frontend/dist) from this same service, so the
+# deployed app is one origin / one public URL. Mounted last: every /api and
+# /webhook route above is matched first. Only present when the build exists
+# (local dev still runs the two services separately via `npm run dev`).
+# --------------------------------------------------------------------------- #
+from pathlib import Path as _Path
+
+from fastapi.staticfiles import StaticFiles
+
+_frontend_dist = _Path(__file__).resolve().parents[2] / "frontend" / "dist"
+if _frontend_dist.is_dir():
+    app.mount("/", StaticFiles(directory=_frontend_dist, html=True), name="frontend")
