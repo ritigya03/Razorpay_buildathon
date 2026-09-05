@@ -54,6 +54,8 @@ class ReplayEngine:
         KEEP = ["TransactionID", "TransactionDT", "TransactionAmt", "isFraud",
                 "_score", "_email", "_card_id", "_device_id", "_uid", "_addr_key"]
         chunks: list[pd.DataFrame] = []
+        cap = settings.replay_max_rows
+        seen = 0
         pf = pq.ParquetFile(settings.test_split)
         for batch in pf.iter_batches(batch_size=1_000):
             chunk = batch.to_pandas()
@@ -65,7 +67,14 @@ class ReplayEngine:
                     + chunk["P_emaildomain"].astype("string").fillna("n"))
             chunk["_addr_key"] = addr.where(chunk["addr1"].notna() & chunk["P_emaildomain"].notna())
             chunks.append(chunk[KEEP].copy())
+            seen += len(chunk)
+            if cap and seen >= cap:
+                # Stop reading/scoring further row groups entirely — a capped
+                # deploy host never pays for the rows it isn't going to use.
+                break
         self.rows = pd.concat(chunks, ignore_index=True).sort_values("TransactionDT").reset_index(drop=True)
+        if cap and len(self.rows) > cap:
+            self.rows = self.rows.iloc[:cap].reset_index(drop=True)
         self._dt = self.rows["TransactionDT"].to_numpy()
         self._virtual_start = float(self._dt[0])
         self.virtual_now = self._virtual_start

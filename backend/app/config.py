@@ -25,6 +25,14 @@ class Settings(BaseSettings):
     # replay engine: how many held-out days pass per real second
     replay_days_per_sec: float = 2.0
     replay_autostart: bool = True
+    # Cap on rows streamed/scored at load time (0 = no cap, use the full split).
+    # The full split (~88.5k rows) takes ~90s to score on a normal machine, but
+    # on a resource-constrained deploy host (e.g. a free-tier CPU) that same
+    # work can take many minutes. Set this to e.g. 15000-20000 on such hosts
+    # to trade replay completeness for a fast, responsive cold start. Does not
+    # affect `make reproduce` / the graded report/metrics.json numbers, which
+    # are computed offline from the full split regardless of this setting.
+    replay_max_rows: int = 0
 
     # ring engine
     ring_cap: int = 25
