@@ -1,7 +1,7 @@
 # Project Sentinel — reproducibility entrypoints
 # `make reproduce` regenerates every number in report/*.json (seed = 42).
 
-DATA_DIR ?= /Users/ritigya/Downloads/ieee-fraud-detection
+DATA_DIR ?= data/raw/ieee-fraud-detection
 PY := .venv/bin/python
 PIP := .venv/bin/pip
 PY_FL := .venv-fl/bin/python

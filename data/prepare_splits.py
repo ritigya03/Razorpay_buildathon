@@ -27,7 +27,7 @@ from pathlib import Path
 
 import pandas as pd
 
-DATA_DIR = Path(os.environ.get("SENTINEL_DATA_DIR", "/Users/ritigya/Downloads/ieee-fraud-detection"))
+DATA_DIR = Path(os.environ.get("SENTINEL_DATA_DIR", "data/raw/ieee-fraud-detection"))
 OUT_DIR = Path(__file__).resolve().parent / "splits"
 
 TRAIN_FRAC = 0.70

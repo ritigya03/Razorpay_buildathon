@@ -10,7 +10,7 @@
 > the **Shadow Engine** (§4.2) was not built — the cross-merchant latency bridge
 > is instead the Phase-8 federated protocol (`train/fl_rings.py`,
 > `backend/app/fl_live.py`); the **agent** (§4.3) runs on Google Gemini's free
-> tier, not the Claude Agent SDK / Vertex, but is the same supervised
+> tier, not the originally-named agent SDK / Vertex, but is the same supervised
 > tool-calling shape; the graded scorer is centralised LightGBM (federated
 > learning of the *scorer* is Phase 4, an MLP; Phase 8 federates the *ring
 > detection layer* with the LightGBM score held fixed). The core claim —

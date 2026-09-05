@@ -171,7 +171,7 @@ surfaced as the dashboard's **Agent** tab. Powered by **Google Gemini**
 replay, dashboard and every other tab still run; only the Agent tab needs it.
 `make test` exercises the tools directly (no model call — no quota spent).
 
-> The concept doc (`project_sentinel.md` §4.3) names the Claude Agent SDK; the
+> The concept doc (`project_sentinel.md` §4.3) names a paid-tier agent SDK; the
 > shipped agent is the same shape — a supervised tool-calling loop — on Gemini's
 > free tier so the demo has no per-call cost. Advisory only: it never blocks
 > anything and has no write path.

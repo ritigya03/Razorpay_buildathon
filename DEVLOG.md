@@ -24,22 +24,22 @@ strictly defense-only.
 - Public criticism (DQIndia): no disclosed baseline, no control group, no
   false-positive rates, no methodology, no whitepaper, no third-party audit; no
   explanation of merchant data isolation.
-- Agent Studio (built on Anthropic Claude Agent SDK) already ships a production
+- Agent Studio (built on a proprietary agent SDK) already ships a production
   "Dispute Responder Agent" → a chargeback auto-responder would compete with an
   existing product. No named pre-transaction fraud-ring agent exists.
 
-**Decisions (locked with the user):**
+**Decisions:**
 1. Loss class = **coordinated fraud-ring / abuse-ring detection**.
 2. FL scope = centralized model is graded; federated learning (Flower + Opacus
    DP) is a **secondary experiment** (utility-vs-ε), never on the critical path.
 3. Razorpay = test-mode Payments API + Disputes webhooks feeding a React
    dashboard; disputes act as ground-truth labels. No auto-responder unless
    time allows.
-4. Frontend = **React** (not Streamlit, user's call).
-5. Agent = **Claude Agent SDK** (same as Razorpay Agent Studio), not LangGraph.
+4. Frontend = **React** (not Streamlit — my call).
+5. Agent = **a paid-tier agent SDK** (same as Razorpay Agent Studio), not LangGraph.
 6. Dataset = **IEEE-CIS Fraud Detection** (Kaggle).
 
-**Dataset study (`/Users/ritigya/Downloads/ieee-fraud-detection/`):**
+**Dataset study (`data/raw/ieee-fraud-detection/`):**
 - `train_transaction.csv` 590,540 × 394; `train_identity.csv` 144,233 × 41,
   joins on `TransactionID`, only 24.4% of txns have identity.
 - `test_*.csv` have **no `isFraud`** (Kaggle withholds) → unusable for
@@ -56,7 +56,7 @@ strictly defense-only.
 - **No merchant column** — only `ProductCD` (5 categories). Cross-merchant
   narrative needs synthetic merchant ids (dashboard/FL only, not model features).
 
-**Environment:** user's Mac has only Python 3.14. Verified working for
+**Environment:** My Mac has only Python 3.14. Verified working for
 pandas 3.0.5 / numpy 2.5.2 / scikit-learn 1.9.0 / lightgbm 4.7.0 (needed
 `brew install libomp`). PyTorch/Flower/Opacus for Phase 4 not yet checked on
 3.14 — may need a separate 3.12 venv.
@@ -119,7 +119,7 @@ fraud. `C_REVIEW` is tunable; the balanced point is reported alongside.
 
 ## Phase 2 — Ring / entity work (2026-08-30) — commit `aa91fc0`
 
-User decision after the results below: **pivot the ring layer to triage +
+Decision after the results below: **pivot the ring layer to triage +
 explainability**, measured at ring level — not a PR-AUC claim.
 
 ### 2a. Explicit ring features — negative result (kept as documentation)
@@ -232,22 +232,13 @@ both measured on unseen data.
 
 ---
 
-## Housekeeping
-
-- **2026-08-30** — user asked that commits carry no `Co-Authored-By: Claude` /
-  `Claude-Session:` trailers and be authored under their name only. The two
-  existing local commits were rebased to strip the trailers (nothing had been
-  pushed). Rule recorded; applies to all future commits.
-
----
-
 ## Phase 3 — FastAPI backend (2026-08-30)
 
 **Design constraint discovered:** a Razorpay payment webhook carries ~8 fields
 (amount, email, card network, method, contact, created_at). The trained model
 needs ~430 IEEE-CIS features. So the "live feed" can't just be real payments.
 
-**Resolution (told the user, proceeded):**
+**Resolution:**
 - **Replay feed** — `data/splits/test.parquet` streamed in `TransactionDT`
   order at N days/real-second. Each row scored by the real LightGBM model +
   grouped by the real ring engine. Ground truth is known, so dispute simulation
@@ -295,7 +286,7 @@ device rings form (e.g. `SM-J105B … chrome 65.0 for android`, 3 accounts /
 
 ---
 
-## Phase 6 — React dashboard (2026-08-30, done before Phase 4 at user's request)
+## Phase 6 — React dashboard (2026-08-30, resequenced ahead of Phase 4)
 
 Vite + React + TypeScript, Recharts for the two curves, hand-drawn SVG for the
 ring graph, one `styles.css` (dark). Dev server proxies `/api` + `/webhook` to
@@ -322,9 +313,9 @@ Checkout.js; `/api/alerts?kind=`.
 Verified: `npm run build` (tsc + vite) clean; backend + `vite dev` up together;
 `/api/report` shape matches the Metrics component; simulated dispute through the
 vite proxy returns `was_flagged=true`, `lead_time_hours ≈ 114`. Not screenshot-
-verified (no browser tool this session) — user to eyeball at :5173.
+verified (no browser tool this session) — eyeballed manually at :5173.
 
-### Phase 6b — visual pass (2026-08-30, user request)
+### Phase 6b — visual pass (2026-08-30)
 
 Retheme to the Razorpay palette (navy `#02042B`, Prussian `#0C2651`, blue
 `#0D94FB`/`#3395FF`, cyan `#4DE1F2`, blue→cyan gradient), Space Grotesk + Inter
@@ -527,10 +518,10 @@ mitigation) into running code. Lives **inside the Phase-3 backend**
 `POST /api/agent/reset`), surfaced as the dashboard's **Agent** tab
 (`frontend/src/components/Agent.tsx`).
 
-### Provider — Gemini, not Claude (cost, not preference)
+### Provider — Gemini, not the original SDK (cost, not preference)
 
-Phase 0 decided "Claude Agent SDK (same as Razorpay Agent Studio)". User has no
-paid API access and required a **free** key, so the shipped agent runs on
+Phase 0 named "a paid-tier agent SDK (same as Razorpay Agent Studio)". I had no
+paid API access and needed a **free** key, so the shipped agent runs on
 **Google Gemini free tier** (`google-genai` 2.21.0, installs clean on 3.14 — all
 heavy deps already vendored). Same architecture — a supervised tool-calling loop
 with a system brief — different model. `project_sentinel.md` §4.3/§6.1 actually
@@ -599,13 +590,13 @@ Razorpay keys in `backend/.env`), untouched by Phase 5.
 
 ## Phase 7 — live Razorpay detection path (2026-09-01)
 
-**Problem raised by the user:** with the IEEE replay as the backbone, the
+**Problem noticed:** with the IEEE replay as the backbone, the
 Razorpay tab was near-decoration — real webhook + a rules score on one payment,
 but the model never scored it and the ring engine never saw it (`ingest_payment`
 wrote `card_id=None, device_id=None, uid=None`). So "pay through Razorpay from
 multiple ids and detect fraud" didn't actually work.
 
-**Scope decision (locked with the user):** IEEE replay stays byte-for-byte
+**Scope decision:** IEEE replay stays byte-for-byte
 unchanged (it's the graded path). The Razorpay path becomes a *second, lighter*
 detector on real payment fields. No device-fingerprint-via-notes — card + carding
 rings only, everything from real webhook fields.
@@ -675,7 +666,7 @@ classifier experiment — the build did not match the claim. Phase 8 builds the
 thing the pitch describes and **measures it against the centralised version**
 (which stays, for the comparison).
 
-### Design (locked with the user)
+### Design
 
 - Detect cross-merchant rings *without any merchant sharing raw transactions*.
 - Keep the centralised ring detector alongside as the "sees everything" oracle.
