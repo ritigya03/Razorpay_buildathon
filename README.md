@@ -1,7 +1,5 @@
 # Project Sentinel
 
-**Razorpay AI Buildathon, Track 02: AI Risk Manager**
-
 Sentinel catches **coordinated fraud rings**: cases where one person or group
 spreads many small transactions across different cards, devices, and merchants
 so that no single merchant sees enough to notice. It scores every transaction,
