@@ -27,12 +27,26 @@ class Scorer:
         else:
             self.booster = self.spec = None
 
-    def score(self, df: pd.DataFrame) -> np.ndarray:
-        """df: raw IEEE-CIS-shaped rows (replay). Returns P(fraud) in [0, 1]."""
+    def score(self, df: pd.DataFrame, chunk_size: int = 10_000) -> np.ndarray:
+        """df: raw IEEE-CIS-shaped rows (replay). Returns P(fraud) in [0, 1].
+
+        Scored in chunks so a full-replay-sized call (~88k rows x ~430 raw
+        columns) never materializes one huge transformed matrix at once —
+        this is the difference between a transient ~150MB peak and a ~1.5GB
+        one on the same data, which matters on a memory-capped deploy host.
+        Single-row / small-batch callers (a live Razorpay payment) are
+        unaffected: below chunk_size this is exactly the old single-shot path.
+        """
         if not self.ok:
             raise RuntimeError("model artifacts missing — run `make baseline`")
-        X = common.transform(df, self.spec)
-        return self.booster.predict(X)
+        if len(df) <= chunk_size:
+            X = common.transform(df, self.spec)
+            return self.booster.predict(X)
+        out = np.empty(len(df), dtype=np.float64)
+        for start in range(0, len(df), chunk_size):
+            chunk = df.iloc[start:start + chunk_size]
+            out[start:start + len(chunk)] = self.booster.predict(common.transform(chunk, self.spec))
+        return out
 
     @staticmethod
     def entity_keys(df: pd.DataFrame) -> pd.DataFrame:

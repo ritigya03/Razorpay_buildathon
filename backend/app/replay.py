@@ -42,15 +42,30 @@ class ReplayEngine:
     def load(self) -> None:
         if self.loaded:
             return
-        df = pd.read_parquet(settings.test_split)
-        df = scorer.entity_keys(df)
-        df["_score"] = scorer.score(df)
-        df["_email"] = df["P_emaildomain"].astype("string")
-        addr = (df["addr1"].astype("string").fillna("n") + "|"
-                + df["addr2"].astype("string").fillna("n") + "|"
-                + df["P_emaildomain"].astype("string").fillna("n"))
-        df["_addr_key"] = addr.where(df["addr1"].notna() & df["P_emaildomain"].notna())
-        self.rows = df.sort_values("TransactionDT").reset_index(drop=True)
+        # `pd.read_parquet` on the whole file peaks at ~850MB above baseline
+        # (434 columns x 88,581 rows going through pyarrow's Arrow->pandas
+        # conversion) even though the resulting frame is only ~300MB — too
+        # much headroom for a memory-capped deploy host. Stream it in
+        # row-group-sized batches instead: score each batch, keep only the
+        # handful of columns anything downstream actually reads, and drop
+        # the rest before the next batch is even read.
+        import pyarrow.parquet as pq
+
+        KEEP = ["TransactionID", "TransactionDT", "TransactionAmt", "isFraud",
+                "_score", "_email", "_card_id", "_device_id", "_uid", "_addr_key"]
+        chunks: list[pd.DataFrame] = []
+        pf = pq.ParquetFile(settings.test_split)
+        for batch in pf.iter_batches(batch_size=1_000):
+            chunk = batch.to_pandas()
+            chunk = scorer.entity_keys(chunk)
+            chunk["_score"] = scorer.score(chunk)
+            chunk["_email"] = chunk["P_emaildomain"].astype("string")
+            addr = (chunk["addr1"].astype("string").fillna("n") + "|"
+                    + chunk["addr2"].astype("string").fillna("n") + "|"
+                    + chunk["P_emaildomain"].astype("string").fillna("n"))
+            chunk["_addr_key"] = addr.where(chunk["addr1"].notna() & chunk["P_emaildomain"].notna())
+            chunks.append(chunk[KEEP].copy())
+        self.rows = pd.concat(chunks, ignore_index=True).sort_values("TransactionDT").reset_index(drop=True)
         self._dt = self.rows["TransactionDT"].to_numpy()
         self._virtual_start = float(self._dt[0])
         self.virtual_now = self._virtual_start
