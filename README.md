@@ -15,6 +15,10 @@ if you want to see where this started.
 > risk score; anything flagged goes to a human, never to an auto-block. There
 > is no code in this repo that can block, freeze, or reverse a payment.
 
+**Video:** [Watch the Sentinel Demo](https://drive.google.com/file/d/12TD_-THouXFWlV4-Dd4ZmMb3I22aQhbL/view?usp=sharing)
+
+**Live Demo:** [Try Sentinel Live](https://project-sentinel-2p5s.onrender.com)
+
 ---
 
 ## Why this exists, and how it relates to Vulcan
